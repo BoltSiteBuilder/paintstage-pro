@@ -129,6 +129,34 @@ const BeforeAfterSlider: React.FC<{ before: string; after: string }> = ({ before
     setSliderPos(pct);
   }, []);
 
+  // Attach touch listeners as non-passive so we can call preventDefault,
+  // which stops the browser from scrolling/panning the page while dragging.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onTouchStart = (e: TouchEvent) => {
+      isDragging.current = true;
+      updatePos(e.touches[0].clientX);
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!isDragging.current) return;
+      e.preventDefault();
+      updatePos(e.touches[0].clientX);
+    };
+    const onTouchEnd = () => { isDragging.current = false; };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [updatePos]);
+
   return (
     <div
       ref={containerRef}
@@ -138,9 +166,6 @@ const BeforeAfterSlider: React.FC<{ before: string; after: string }> = ({ before
       onMouseMove={e  => { if (isDragging.current) updatePos(e.clientX); }}
       onMouseUp={() => { isDragging.current = false; }}
       onMouseLeave={() => { isDragging.current = false; }}
-      onTouchStart={e  => { isDragging.current = true; updatePos(e.touches[0].clientX); }}
-      onTouchMove={e   => { if (isDragging.current) updatePos(e.touches[0].clientX); }}
-      onTouchEnd={() => { isDragging.current = false; }}
     >
       {/* After (painted) — base layer, always fully visible */}
       <img
