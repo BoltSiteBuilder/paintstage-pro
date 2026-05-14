@@ -557,13 +557,7 @@ export default function App() {
 
           {/* Right side */}
           <div className="flex items-center gap-3">
-            <a
-              href={`tel:${COMPANY_PHONE.replace(/\D/g, '')}`}
-              className="hidden sm:block text-sm font-semibold text-brand-dark hover:text-brand-accent transition-colors"
-            >
-              {COMPANY_PHONE}
-            </a>
-            {step === 'result' && (
+{step === 'result' && (
               <button
                 onClick={scrollToForm}
                 className="px-4 py-2 bg-brand-accent hover:bg-brand-accenthover text-white rounded-lg font-bold text-sm shadow-sm transition-all"
