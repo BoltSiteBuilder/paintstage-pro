@@ -285,7 +285,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [imageName, setImageName] = useState('My Room');
   const [isEditingName, setIsEditingName] = useState(false);
-  const [additionalImages, setAdditionalImages] = useState<{ dataUrl: string; name: string }[]>([]);
+  const [additionalImages, setAdditionalImages] = useState<{ dataUrl: string; name: string; mimeType: string }[]>([]);
   const [isDraggingAdditional, setIsDraggingAdditional] = useState(false);
   const additionalInputRef = useRef<HTMLInputElement>(null);
 
@@ -705,7 +705,7 @@ export default function App() {
                       Array.from(e.target.files ?? []).forEach(file => {
                         const reader = new FileReader();
                         reader.onload = ev => {
-                          setAdditionalImages(prev => [...prev, { dataUrl: ev.target?.result as string, name: file.name.replace(/\.[^/.]+$/, '') }]);
+                          setAdditionalImages(prev => [...prev, { dataUrl: ev.target?.result as string, name: file.name.replace(/\.[^/.]+$/, ''), mimeType: file.type || 'image/jpeg' }]);
                         };
                         reader.readAsDataURL(file);
                       });
@@ -721,7 +721,7 @@ export default function App() {
                       Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')).forEach(file => {
                         const reader = new FileReader();
                         reader.onload = ev => {
-                          setAdditionalImages(prev => [...prev, { dataUrl: ev.target?.result as string, name: file.name.replace(/\.[^/.]+$/, '') }]);
+                          setAdditionalImages(prev => [...prev, { dataUrl: ev.target?.result as string, name: file.name.replace(/\.[^/.]+$/, ''), mimeType: file.type || 'image/jpeg' }]);
                         };
                         reader.readAsDataURL(file);
                       });
@@ -742,7 +742,18 @@ export default function App() {
                   {additionalImages.length > 0 && (
                     <div className="mt-3 grid grid-cols-2 gap-2">
                       {additionalImages.map((img, idx) => (
-                        <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                        <div
+                          key={idx}
+                          className="relative group rounded-xl overflow-hidden border border-slate-200 bg-slate-100 cursor-pointer ring-0 hover:ring-2 hover:ring-brand-accent transition-all"
+                          onClick={() => {
+                            const prevMain = { dataUrl: originalImage!, name: imageName, mimeType: originalMimeType };
+                            setOriginalImage(img.dataUrl);
+                            setOriginalMimeType(img.mimeType);
+                            setImageName(img.name);
+                            setResultImage(null);
+                            setAdditionalImages(prev => prev.map((im, i) => i === idx ? prevMain : im));
+                          }}
+                        >
                           <img src={img.dataUrl} alt={img.name} className="w-full aspect-video object-cover" />
                           <div className="absolute bottom-0 inset-x-0 bg-black/50 px-2 py-1 flex items-center gap-1">
                             <input
@@ -756,7 +767,7 @@ export default function App() {
                             </svg>
                           </div>
                           <button
-                            onClick={() => setAdditionalImages(prev => prev.filter((_, i) => i !== idx))}
+                            onClick={e => { e.stopPropagation(); setAdditionalImages(prev => prev.filter((_, i) => i !== idx)); }}
                             className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
                           >
                             ×
