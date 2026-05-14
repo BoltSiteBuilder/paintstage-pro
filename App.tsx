@@ -289,6 +289,11 @@ export default function App() {
   const [isDraggingAdditional, setIsDraggingAdditional] = useState(false);
   const additionalInputRef = useRef<HTMLInputElement>(null);
 
+  // Result page extra photos
+  const [resultPhotos, setResultPhotos] = useState<{ dataUrl: string; name: string; mimeType: string }[]>([]);
+  const [isDraggingResult, setIsDraggingResult] = useState(false);
+  const resultPhotosInputRef = useRef<HTMLInputElement>(null);
+
   // Paint selection state
   const [selectedBrand, setSelectedBrand] = useState<PaintBrand>('Sherwin Williams');
   const [colorName,     setColorName]     = useState('Agreeable Gray');
@@ -541,6 +546,7 @@ export default function App() {
     setSubmitStatus('idle');
     setImageName('My Room');
     setAdditionalImages([]);
+    setResultPhotos([]);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -979,6 +985,86 @@ export default function App() {
                   Download After
                 </button>
               </div>
+            </div>
+
+            {/* ── Additional room photos ── */}
+            <div className="w-full max-w-3xl">
+              <input
+                ref={resultPhotosInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={e => {
+                  Array.from(e.target.files ?? []).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                      setResultPhotos(prev => [...prev, { dataUrl: ev.target?.result as string, name: file.name.replace(/\.[^/.]+$/, ''), mimeType: file.type || 'image/jpeg' }]);
+                    };
+                    reader.readAsDataURL(file);
+                  });
+                  e.target.value = '';
+                }}
+              />
+              <div
+                onDragOver={e => { e.preventDefault(); setIsDraggingResult(true); }}
+                onDragLeave={() => setIsDraggingResult(false)}
+                onDrop={e => {
+                  e.preventDefault();
+                  setIsDraggingResult(false);
+                  Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                      setResultPhotos(prev => [...prev, { dataUrl: ev.target?.result as string, name: file.name.replace(/\.[^/.]+$/, ''), mimeType: file.type || 'image/jpeg' }]);
+                    };
+                    reader.readAsDataURL(file);
+                  });
+                }}
+                onClick={() => resultPhotosInputRef.current?.click()}
+                className={`rounded-xl border-2 border-dashed cursor-pointer transition-all flex items-center justify-center gap-2 py-4 px-4 text-sm font-medium ${
+                  isDraggingResult
+                    ? 'border-brand-accent bg-brand-light text-brand-accent'
+                    : 'border-slate-300 bg-white text-slate-500 hover:border-brand-accent hover:text-brand-accent hover:bg-brand-light'
+                }`}
+              >
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Upload more photos to visualize with this color
+              </div>
+
+              {resultPhotos.length > 0 && (
+                <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 gap-3">
+                  {resultPhotos.map((photo, idx) => (
+                    <div key={idx} className="relative group">
+                      <button
+                        className="w-full rounded-xl overflow-hidden border-2 border-slate-200 hover:border-brand-accent transition-all block focus:outline-none focus:border-brand-accent"
+                        title={`Use "${photo.name}" as your room photo`}
+                        onClick={() => {
+                          setOriginalImage(photo.dataUrl);
+                          setOriginalMimeType(photo.mimeType);
+                          setImageName(photo.name);
+                          setResultImage(null);
+                          setResultPhotos(prev => prev.filter((_, i) => i !== idx));
+                          setStep('configure');
+                        }}
+                      >
+                        <img src={photo.dataUrl} alt={photo.name} className="w-full aspect-video object-cover" />
+                        <div className="bg-white px-2 py-1.5">
+                          <p className="text-xs font-medium text-slate-700 truncate">{photo.name}</p>
+                          <p className="text-xs text-brand-accent font-semibold mt-0.5">Click to use</p>
+                        </div>
+                      </button>
+                      <button
+                        onClick={e => { e.stopPropagation(); setResultPhotos(prev => prev.filter((_, i) => i !== idx)); }}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-slate-600 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 z-10"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Action row */}
