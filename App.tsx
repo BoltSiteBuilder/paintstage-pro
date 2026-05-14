@@ -557,7 +557,6 @@ export default function App() {
               <span className="text-base font-black text-brand-dark leading-none">
                 PaintStage <span className="text-brand-accent">Pro</span>
               </span>
-              <div className="text-xs text-slate-400 leading-none mt-0.5">{COMPANY_NAME}</div>
             </div>
           </button>
 
@@ -1284,8 +1283,7 @@ export default function App() {
 
       {/* ── Footer ──────────────────────────────────────────── */}
       <footer className="mt-16 py-8 border-t border-slate-200 text-center">
-        <p className="text-slate-400 text-sm font-medium">{COMPANY_NAME}</p>
-        <p className="text-slate-300 text-xs mt-1">
+<p className="text-slate-300 text-xs mt-1">
           AI color visualizations are approximate previews. Actual results may vary based on lighting, surface texture, and paint sheen.
         </p>
         <p className="text-slate-300 text-xs mt-1">Powered by Google Gemini AI</p>
