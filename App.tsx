@@ -1,5 +1,10 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { applyPaintColor, tweakPaintedImage } from './services/geminiService';
+import {
+  applyPaintColor,
+  applyTrimColor,
+  applyDoorColor,
+  tweakPaintedImage,
+} from './services/geminiService';
 
 // ============================================================
 // CONFIGURATION — Customize these for Matt's business
@@ -211,6 +216,18 @@ export default function App() {
   const [isTweaking,   setIsTweaking]   = useState(false);
   const [tweakError,   setTweakError]   = useState<string | null>(null);
 
+  // Trim state
+  const [trimName,    setTrimName]    = useState('Pure White');
+  const [trimHex,     setTrimHex]     = useState('#F5F5F0');
+  const [isPaintingTrim, setIsPaintingTrim] = useState(false);
+  const [trimError,   setTrimError]   = useState<string | null>(null);
+
+  // Door state
+  const [doorName,    setDoorName]    = useState('Tricorn Black');
+  const [doorHex,     setDoorHex]     = useState('#1F1F1F');
+  const [isPaintingDoor, setIsPaintingDoor] = useState(false);
+  const [doorError,   setDoorError]   = useState<string | null>(null);
+
   // Lead form state
   const [formName,    setFormName]    = useState('');
   const [formEmail,   setFormEmail]   = useState('');
@@ -296,17 +313,58 @@ export default function App() {
     }
   }, [originalImage, originalMimeType, selectedBrand, colorName, hexCode]);
 
+  // Helper: extract base64 + mime from the current result data URL
+  const splitDataUrl = (dataUrl: string): { mime: string; base64: string } | null => {
+    const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+    if (!match) return null;
+    return { mime: match[1], base64: match[2] };
+  };
+
+  // ── Apply trim color ────────────────────────────────────
+  const handleApplyTrim = useCallback(async () => {
+    if (!resultImage || !trimHex || isPaintingTrim) return;
+    setIsPaintingTrim(true);
+    setTrimError(null);
+    try {
+      const parts = splitDataUrl(resultImage);
+      if (!parts) throw new Error('Could not parse the current image.');
+      const result = await applyTrimColor(parts.base64, parts.mime, trimName || 'Custom Trim', trimHex);
+      setResultImage(result);
+    } catch (err: any) {
+      console.error('Trim paint error:', err);
+      setTrimError(err.message ?? 'Could not apply the trim color. Try again.');
+    } finally {
+      setIsPaintingTrim(false);
+    }
+  }, [resultImage, trimName, trimHex, isPaintingTrim]);
+
+  // ── Apply door color ────────────────────────────────────
+  const handleApplyDoor = useCallback(async () => {
+    if (!resultImage || !doorHex || isPaintingDoor) return;
+    setIsPaintingDoor(true);
+    setDoorError(null);
+    try {
+      const parts = splitDataUrl(resultImage);
+      if (!parts) throw new Error('Could not parse the current image.');
+      const result = await applyDoorColor(parts.base64, parts.mime, doorName || 'Custom Door', doorHex);
+      setResultImage(result);
+    } catch (err: any) {
+      console.error('Door paint error:', err);
+      setDoorError(err.message ?? 'Could not apply the door color. Try again.');
+    } finally {
+      setIsPaintingDoor(false);
+    }
+  }, [resultImage, doorName, doorHex, isPaintingDoor]);
+
   // ── Apply a tweak to the painted result ──────────────────
   const handleTweak = useCallback(async () => {
     if (!resultImage || !tweakPrompt.trim() || isTweaking) return;
     setIsTweaking(true);
     setTweakError(null);
     try {
-      // Extract mime type and base64 from the current result data URL
-      const match = resultImage.match(/^data:([^;]+);base64,(.+)$/);
-      if (!match) throw new Error('Could not parse the current image.');
-      const [, mime, base64] = match;
-      const tweaked = await tweakPaintedImage(base64, mime, tweakPrompt.trim());
+      const parts = splitDataUrl(resultImage);
+      if (!parts) throw new Error('Could not parse the current image.');
+      const tweaked = await tweakPaintedImage(parts.base64, parts.mime, tweakPrompt.trim());
       setResultImage(tweaked);
       setTweakPrompt('');
     } catch (err: any) {
@@ -761,6 +819,187 @@ export default function App() {
               >
                 Request Free Estimate →
               </button>
+            </div>
+
+            {/* ════════════════════════════════════════
+                CUSTOMIZE TRIM & DOORS
+            ════════════════════════════════════════ */}
+            <div className="w-full max-w-2xl mt-2">
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-7">
+                <div className="flex items-start gap-3 mb-5">
+                  <div className="w-10 h-10 rounded-xl bg-brand-light flex-shrink-0 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-brand-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-4a2 2 0 00-2 2v4a2 2 0 002 2zm0-2h12" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-black text-brand-dark leading-tight">Customize trim & doors</h3>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                      Paint trim, baseboards, and doors separately — they stayed their original color above.
+                    </p>
+                  </div>
+                </div>
+
+                {/* ── TRIM ── */}
+                <div className="border border-slate-200 rounded-2xl p-5 mb-4">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+                    Trim, baseboards & frames
+                  </p>
+                  <div className="flex items-center gap-3 mb-3">
+                    <label
+                      className="flex-shrink-0 w-12 h-12 rounded-xl border-2 border-slate-200 cursor-pointer shadow-sm overflow-hidden hover:border-brand-accent transition-colors relative"
+                      style={{ backgroundColor: trimHex }}
+                    >
+                      <input
+                        type="color"
+                        value={trimHex.length === 7 ? trimHex : '#FFFFFF'}
+                        onChange={e => setTrimHex(e.target.value)}
+                        className="opacity-0 w-full h-full cursor-pointer absolute inset-0"
+                      />
+                    </label>
+                    <input
+                      type="text"
+                      value={trimHex}
+                      onChange={e => {
+                        const v = e.target.value.startsWith('#') ? e.target.value : `#${e.target.value}`;
+                        if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setTrimHex(v);
+                      }}
+                      maxLength={7}
+                      placeholder="#RRGGBB"
+                      className="w-28 border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm font-mono"
+                    />
+                    <input
+                      type="text"
+                      value={trimName}
+                      onChange={e => setTrimName(e.target.value)}
+                      placeholder="Color name (optional)"
+                      className="flex-1 border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm"
+                    />
+                  </div>
+
+                  {/* Quick trim presets */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {[
+                      { name: 'Pure White',  hex: '#F5F5F0' },
+                      { name: 'Alabaster',   hex: '#F2EFE4' },
+                      { name: 'Soft Cream',  hex: '#EDE6D3' },
+                      { name: 'Light Gray',  hex: '#D5D2CC' },
+                      { name: 'Charcoal',    hex: '#3D3D3D' },
+                    ].map(p => (
+                      <button
+                        key={p.name}
+                        type="button"
+                        onClick={() => { setTrimName(p.name); setTrimHex(p.hex); }}
+                        disabled={isPaintingTrim}
+                        className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border border-slate-200 text-slate-600 hover:border-brand-accent transition-all disabled:opacity-50"
+                      >
+                        <span className="inline-block w-3 h-3 rounded-full border border-black/10" style={{ backgroundColor: p.hex }} />
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  {trimError && <p className="text-xs text-red-600 mb-2">{trimError}</p>}
+
+                  <button
+                    onClick={handleApplyTrim}
+                    disabled={isPaintingTrim || !trimHex || isTweaking || isPaintingDoor}
+                    className="w-full py-2.5 bg-brand-dark hover:bg-black disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                  >
+                    {isPaintingTrim ? (
+                      <>
+                        <div className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white spinner" />
+                        Painting trim…
+                      </>
+                    ) : (
+                      <>Apply Trim Color</>
+                    )}
+                  </button>
+                </div>
+
+                {/* ── DOORS ── */}
+                <div className="border border-slate-200 rounded-2xl p-5">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+                    Doors
+                  </p>
+                  <div className="flex items-center gap-3 mb-3">
+                    <label
+                      className="flex-shrink-0 w-12 h-12 rounded-xl border-2 border-slate-200 cursor-pointer shadow-sm overflow-hidden hover:border-brand-accent transition-colors relative"
+                      style={{ backgroundColor: doorHex }}
+                    >
+                      <input
+                        type="color"
+                        value={doorHex.length === 7 ? doorHex : '#1F1F1F'}
+                        onChange={e => setDoorHex(e.target.value)}
+                        className="opacity-0 w-full h-full cursor-pointer absolute inset-0"
+                      />
+                    </label>
+                    <input
+                      type="text"
+                      value={doorHex}
+                      onChange={e => {
+                        const v = e.target.value.startsWith('#') ? e.target.value : `#${e.target.value}`;
+                        if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setDoorHex(v);
+                      }}
+                      maxLength={7}
+                      placeholder="#RRGGBB"
+                      className="w-28 border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm font-mono"
+                    />
+                    <input
+                      type="text"
+                      value={doorName}
+                      onChange={e => setDoorName(e.target.value)}
+                      placeholder="Color name (optional)"
+                      className="flex-1 border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm"
+                    />
+                  </div>
+
+                  {/* Quick door presets */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {[
+                      { name: 'Tricorn Black',  hex: '#1F1F1F' },
+                      { name: 'Hale Navy',      hex: '#3B4A5A' },
+                      { name: 'Iron Ore',       hex: '#3C3936' },
+                      { name: 'Forest Green',   hex: '#3A5240' },
+                      { name: 'Crisp White',    hex: '#F5F5F0' },
+                      { name: 'Brick Red',      hex: '#7C2D2A' },
+                    ].map(p => (
+                      <button
+                        key={p.name}
+                        type="button"
+                        onClick={() => { setDoorName(p.name); setDoorHex(p.hex); }}
+                        disabled={isPaintingDoor}
+                        className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border border-slate-200 text-slate-600 hover:border-brand-accent transition-all disabled:opacity-50"
+                      >
+                        <span className="inline-block w-3 h-3 rounded-full border border-black/10" style={{ backgroundColor: p.hex }} />
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  {doorError && <p className="text-xs text-red-600 mb-2">{doorError}</p>}
+
+                  <button
+                    onClick={handleApplyDoor}
+                    disabled={isPaintingDoor || !doorHex || isTweaking || isPaintingTrim}
+                    className="w-full py-2.5 bg-brand-dark hover:bg-black disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                  >
+                    {isPaintingDoor ? (
+                      <>
+                        <div className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white spinner" />
+                        Painting doors…
+                      </>
+                    ) : (
+                      <>Apply Door Color</>
+                    )}
+                  </button>
+                </div>
+
+                <p className="mt-3 text-[11px] text-slate-300 text-center">
+                  Each change builds on the current image — you can layer wall + trim + door colors.
+                </p>
+              </div>
             </div>
 
             {/* ════════════════════════════════════════
