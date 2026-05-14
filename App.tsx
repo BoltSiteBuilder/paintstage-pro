@@ -544,7 +544,7 @@ export default function App() {
     <div className="min-h-screen bg-page-bg text-brand-dark font-sans flex flex-col">
 
       {/* ── Header ─────────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 bg-white/60 backdrop-blur-md border-b border-white/40 shadow-sm">
+      <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-24 flex items-center justify-between">
           {/* Logo */}
           <button onClick={resetToUpload} className="group">
