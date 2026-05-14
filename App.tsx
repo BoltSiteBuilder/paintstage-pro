@@ -513,11 +513,11 @@ export default function App() {
             {/* Hero */}
             <div className="text-center max-w-2xl mb-10">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-brand-dark leading-tight mb-4">
-                See Your Walls Painted<br />
+                See Your Home Painted<br />
                 <span className="text-brand-accent">Before You Commit</span>
               </h1>
               <p className="text-lg sm:text-xl text-slate-500">
-                Upload a room photo, pick any paint color, and watch AI transform your walls in seconds.
+                Upload an interior or exterior photo, pick any paint color, and watch AI transform it in seconds.
               </p>
             </div>
 
@@ -546,10 +546,10 @@ export default function App() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-brand-dark">Drop your room photo here</p>
+                  <p className="text-xl font-bold text-brand-dark">Drop your photo here</p>
                   <p className="text-slate-500 mt-1">or click to browse</p>
                   <p className="text-sm text-slate-400 mt-4">
-                    Any room • JPG, PNG, or WEBP • Works best with well-lit photos
+                    Interior or exterior • JPG, PNG, or WEBP • Works best with well-lit photos
                   </p>
                 </div>
               </div>
@@ -560,7 +560,7 @@ export default function App() {
               <p className="text-center text-sm font-bold text-slate-400 uppercase tracking-widest mb-7">How It Works</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 {[
-                  { emoji: '📷', title: 'Upload Your Photo',    body: 'Take a picture of the room you want painted and upload it here.' },
+                  { emoji: '📷', title: 'Upload Your Photo',    body: 'Take a picture of the room or exterior you want painted and upload it here.' },
                   { emoji: '🎨', title: 'Choose a Paint Color', body: 'Pick from Sherwin-Williams, Benjamin Moore, or Behr — or enter any hex code.' },
                   { emoji: '✨', title: 'See It Painted',       body: "AI applies the color to your walls. Love it? Request a free estimate from Matt's team." },
                 ].map(item => (

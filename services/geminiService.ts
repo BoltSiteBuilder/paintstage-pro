@@ -63,40 +63,50 @@ export const applyPaintColor = async (
   colorName: string,
   hexCode: string
 ): Promise<string> => {
-  const systemInstruction = `You are an expert paint visualization AI. Your ONLY task is to repaint the WALLS (for interior photos) or the SIDING (for exterior photos) of the provided photo. Everything else must remain UNTOUCHED in its original color.
+  const systemInstruction = `You are a professional residential paint visualization AI for a painting contractor. You handle BOTH interior rooms AND exterior buildings/houses — both are normal, valid requests for you. Your task is to repaint the primary surfaces (walls indoors, siding outdoors) of the provided photo while keeping everything else exactly as it appears.
+
+DETERMINE THE PHOTO TYPE FIRST:
+- If the photo shows the INSIDE of a building (room, hallway, kitchen, etc.) — treat WALLS as the surfaces to paint
+- If the photo shows the OUTSIDE of a building (house exterior, facade, etc.) — treat the EXTERIOR SIDING/CLADDING as the surfaces to paint (this includes vinyl siding, lap siding, board-and-batten, stucco, shingle siding, brick if painted brick, fiber cement, or any primary exterior wall cladding)
+- BOTH are valid — paint visualization for exteriors is just as common as interiors
 
 PAINT THESE SURFACES (and only these):
-- For interior photos: every wall surface — back wall, left wall, right wall, side walls, partial walls at the edges, walls behind furniture, walls around fireplaces, walls next to doorways, walls around windows, walls visible in adjacent rooms or hallways
-- For exterior photos: every main exterior siding/wall surface — the primary cladding of the building
+- Interior photos: every wall surface — back wall, left wall, right wall, side walls, partial walls at edges, walls behind furniture, walls around fireplaces, walls next to doorways, walls around windows, walls visible in adjacent rooms or hallways
+- Exterior photos: every primary siding/cladding surface — front, side, back, gable ends, dormers, second story, anywhere the main exterior wall cladding is visible
 
-CRITICAL — PAINT EVERY VISIBLE WALL/SIDING SURFACE:
-- If you can see a wall/siding surface, you MUST paint it the new color
+CRITICAL — PAINT EVERY VISIBLE PRIMARY SURFACE:
+- If you can see a wall (interior) or siding panel (exterior), you MUST paint it the new color
 - Do NOT leave any wall/siding in the original color
-- Do NOT treat any wall as an "accent" — every wall gets the same new color
+- Do NOT treat any wall/siding section as an "accent" — every section gets the same new color
 
 ABSOLUTELY DO NOT PAINT (keep these EXACTLY as they appear in the original):
-- DOORS (door slabs / door panels) — leave doors in their original color completely
-- DOOR FRAMES, DOOR CASINGS, DOOR JAMBS — leave all door trim untouched
-- WINDOW FRAMES, WINDOW CASINGS, WINDOW SILLS — leave all window trim untouched
-- BASEBOARDS — leave all baseboards untouched
-- CROWN MOLDING, CHAIR RAILS, PICTURE RAILS — leave all moldings untouched
-- CEILINGS (and tray ceilings, coffered ceilings) — leave all ceilings untouched
-- FLOORING (wood, tile, carpet, concrete) — leave all floors untouched
-- FURNITURE, fixtures, artwork, mirrors, switches, outlets — leave all decor untouched
-- For exterior: roofs, fascia, soffits, gutters, garage doors, front doors, window/door trim — leave untouched
+- DOORS (door slabs / door panels) — front door, back door, interior doors, garage doors — leave doors in their original color
+- DOOR FRAMES, DOOR CASINGS, DOOR JAMBS, DOOR TRIM — leave untouched
+- WINDOW FRAMES, WINDOW CASINGS, WINDOW SILLS, WINDOW SHUTTERS — leave untouched
+- BASEBOARDS (interior) — leave untouched
+- CROWN MOLDING, CHAIR RAILS, PICTURE RAILS (interior) — leave untouched
+- FASCIA, SOFFITS, FRIEZE BOARDS, CORNER BOARDS, RAKE BOARDS (exterior trim) — leave untouched
+- CEILINGS (interior), ROOFS, SHINGLES, GUTTERS, DOWNSPOUTS (exterior) — leave untouched
+- FLOORING / PORCHES / DECKS / PATIOS / DRIVEWAYS / WALKWAYS — leave untouched
+- LANDSCAPING, GRASS, TREES, BUSHES, FLOWERS, SKY, CLOUDS — leave untouched
+- FURNITURE, fixtures, artwork, mirrors, switches, outlets — leave untouched
+- OUTDOOR LIGHTING, HOUSE NUMBERS, MAILBOXES, RAILINGS — leave untouched
 
 REALISM:
-- The new wall color must look photorealistic with natural light variation, subtle shading from light sources, and faint wall texture beneath the paint
-- Walls should show realistic shadows from light direction and any objects in the room
-- The transition between the painted walls and the unchanged trim/doors/ceiling must be crisp and clean, matching the natural edges of the architecture`;
+- The new color must look photorealistic with natural light variation, subtle shading from light sources, and faint surface texture beneath the paint
+- Surfaces should show realistic shadows from light direction and any objects in the scene
+- The transition between the painted surfaces and the unchanged trim/doors/ceiling/roof must be crisp and clean, matching the natural edges of the architecture
+- For exterior twilight or evening photos, preserve the existing sky, lighting, and window glow exactly`;
 
-  const userPrompt = `Repaint EVERY visible wall surface (or for exterior photos, every siding surface) in this image with the paint color "${colorName}" by ${brand} (hex code: ${hexCode}).
+  const userPrompt = `Repaint EVERY visible primary surface in this photo with the paint color "${colorName}" by ${brand} (hex code: ${hexCode}).
 
-PAINT THESE: every wall/siding surface — back, left, right, side, partial, around fireplaces, around doorways, around windows, in adjacent rooms visible through doorways.
+If this is an INTERIOR photo: paint every wall surface — back, left, right, side, partial, around fireplaces, doorways, windows, in adjacent rooms visible through doorways.
 
-DO NOT PAINT: doors, door frames, door casings, window frames, window casings, baseboards, crown molding, ceilings, floors, furniture, or any other element. These must stay EXACTLY their original color.
+If this is an EXTERIOR photo: paint every section of exterior siding/cladding — front, sides, back, gable ends, dormers, second story, all primary exterior wall coverings.
 
-The output should look like a real photograph of this space after only the walls (or siding) were professionally painted with ${brand} "${colorName}" (${hexCode}) — every door, trim piece, baseboard, ceiling, and floor still in its original color, untouched.`;
+DO NOT PAINT: doors, door frames, door casings, window frames, window casings, window shutters, baseboards, crown molding, ceilings, floors, roofs, fascia, soffits, gutters, porches, decks, landscaping, sky, furniture, or any other element. These must stay EXACTLY their original color.
+
+The output should look like a real photograph of this space after only the walls (interior) or siding (exterior) were professionally painted with ${brand} "${colorName}" (${hexCode}) — every door, trim piece, baseboard, ceiling, roof, and surrounding element still in its original color, untouched.`;
 
   return generateImage(base64ImageData, mimeType, `${systemInstruction}\n\n${userPrompt}`);
 };
@@ -110,22 +120,23 @@ export const applyTrimColor = async (
   colorName: string,
   hexCode: string
 ): Promise<string> => {
-  const systemInstruction = `You are an expert paint visualization AI. Your ONLY task is to repaint the TRIM in the provided photo. Everything else must remain UNTOUCHED.
+  const systemInstruction = `You are a professional residential paint visualization AI for a painting contractor. You handle BOTH interior rooms AND exterior buildings/houses. Your task is to repaint ONLY the TRIM in the provided photo. Everything else must remain UNTOUCHED.
 
 PAINT ONLY THESE TRIM ELEMENTS:
-- For interior photos: baseboards, crown molding, chair rails, picture rails, door casings/frames, window casings/frames, window sills, door jambs
-- For exterior photos: fascia boards, soffits, window trim/casings, door trim/casings, corner boards, frieze boards, rake boards
+- Interior photos: baseboards, crown molding, chair rails, picture rails, door casings/frames, window casings/frames, window sills, door jambs
+- Exterior photos: fascia boards, soffits, window trim/casings, door trim/casings, window shutters, corner boards, frieze boards, rake boards, porch posts/columns
 
 ABSOLUTELY DO NOT PAINT:
-- WALLS or SIDING — leave the wall/siding color exactly as it appears now
+- WALLS or EXTERIOR SIDING — leave the wall/siding color exactly as it appears now
 - DOORS (door slabs / door panels) — leave doors untouched
-- CEILINGS — leave ceilings untouched
-- FLOORING — leave floors untouched
+- CEILINGS or ROOFS — leave untouched
+- FLOORING / PORCHES / DECKS — leave untouched
+- LANDSCAPING, SKY, GRASS, TREES (exterior) — leave untouched
 - FURNITURE, fixtures, artwork, decor — leave everything else untouched
 
 REALISM:
 - The new trim color must look photorealistic with proper light variation along the trim
-- Clean, sharp edges where trim meets walls, doors, and ceiling
+- Clean, sharp edges where trim meets walls/siding, doors, and ceiling/roof
 - Preserve all shadows and dimensional details on the trim profiles`;
 
   const userPrompt = `Repaint ALL trim elements in this image with the color "${colorName}" (hex code: ${hexCode}).
@@ -148,7 +159,7 @@ export const applyDoorColor = async (
   colorName: string,
   hexCode: string
 ): Promise<string> => {
-  const systemInstruction = `You are an expert paint visualization AI. Your ONLY task is to repaint the DOORS in the provided photo. Everything else must remain UNTOUCHED.
+  const systemInstruction = `You are a professional residential paint visualization AI for a painting contractor. You handle BOTH interior and exterior photos. Your task is to repaint ONLY the DOORS in the provided photo. Everything else must remain UNTOUCHED.
 
 PAINT ONLY THE DOOR SLABS:
 - The moveable door panels themselves — the flat or paneled face of each door
