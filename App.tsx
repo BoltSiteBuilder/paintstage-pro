@@ -1286,7 +1286,7 @@ export default function App() {
 <p className="text-slate-300 text-xs mt-1">
           AI color visualizations are approximate previews. Actual results may vary based on lighting, surface texture, and paint sheen.
         </p>
-        <p className="text-slate-300 text-xs mt-1">Powered by Google Gemini AI</p>
+        <p className="text-slate-300 text-xs mt-1">Powered by <a href="https://AxiiumSystems.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-500 transition-colors underline underline-offset-2">Axiium Systems</a></p>
       </footer>
 
     </div>
