@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { applyPaintColor } from './services/geminiService';
+import { applyPaintColor, tweakPaintedImage } from './services/geminiService';
 
 // ============================================================
 // CONFIGURATION — Customize these for Matt's business
@@ -206,6 +206,11 @@ export default function App() {
   const [hexCode,       setHexCode]       = useState('#B9B5A9');
   const [selectedSwatch, setSelectedSwatch] = useState<string | null>('Agreeable Gray');
 
+  // Tweak state
+  const [tweakPrompt,  setTweakPrompt]  = useState('');
+  const [isTweaking,   setIsTweaking]   = useState(false);
+  const [tweakError,   setTweakError]   = useState<string | null>(null);
+
   // Lead form state
   const [formName,    setFormName]    = useState('');
   const [formEmail,   setFormEmail]   = useState('');
@@ -290,6 +295,27 @@ export default function App() {
       setStep('configure');
     }
   }, [originalImage, originalMimeType, selectedBrand, colorName, hexCode]);
+
+  // ── Apply a tweak to the painted result ──────────────────
+  const handleTweak = useCallback(async () => {
+    if (!resultImage || !tweakPrompt.trim() || isTweaking) return;
+    setIsTweaking(true);
+    setTweakError(null);
+    try {
+      // Extract mime type and base64 from the current result data URL
+      const match = resultImage.match(/^data:([^;]+);base64,(.+)$/);
+      if (!match) throw new Error('Could not parse the current image.');
+      const [, mime, base64] = match;
+      const tweaked = await tweakPaintedImage(base64, mime, tweakPrompt.trim());
+      setResultImage(tweaked);
+      setTweakPrompt('');
+    } catch (err: any) {
+      console.error('Tweak error:', err);
+      setTweakError(err.message ?? 'Could not apply that tweak. Try rephrasing.');
+    } finally {
+      setIsTweaking(false);
+    }
+  }, [resultImage, tweakPrompt, isTweaking]);
 
   // ── Lead form submit ─────────────────────────────────────
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
@@ -735,6 +761,85 @@ export default function App() {
               >
                 Request Free Estimate →
               </button>
+            </div>
+
+            {/* ════════════════════════════════════════
+                TWEAK / REFINE THE RESULT
+            ════════════════════════════════════════ */}
+            <div className="w-full max-w-2xl mt-2">
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-7">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-brand-light flex-shrink-0 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-brand-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-black text-brand-dark leading-tight">Not quite right? Tweak it.</h3>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                      Tell the AI what to adjust and we'll refine the image without starting over.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Suggestion chips */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {[
+                    'Also paint the wall to the left of the fireplace',
+                    'Make the color a little lighter',
+                    'Make the color a little darker',
+                    'Paint the ceiling white',
+                  ].map(suggestion => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() => setTweakPrompt(suggestion)}
+                      disabled={isTweaking}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 hover:border-brand-accent hover:text-brand-accent hover:bg-brand-light transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+
+                <textarea
+                  value={tweakPrompt}
+                  onChange={e => setTweakPrompt(e.target.value)}
+                  placeholder="Describe what to change (e.g., 'Paint the wall to the left of the fireplace too')"
+                  rows={2}
+                  disabled={isTweaking}
+                  className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm resize-none disabled:opacity-60"
+                />
+
+                {tweakError && (
+                  <p className="mt-2 text-xs text-red-600 leading-relaxed">{tweakError}</p>
+                )}
+
+                <button
+                  onClick={handleTweak}
+                  disabled={isTweaking || !tweakPrompt.trim()}
+                  className="mt-3 w-full py-3 bg-brand-accent hover:bg-brand-accenthover disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-black text-sm shadow-md transition-all flex items-center justify-center gap-2"
+                >
+                  {isTweaking ? (
+                    <>
+                      <div className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white spinner" />
+                      Applying tweak…
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Apply Tweak
+                    </>
+                  )}
+                </button>
+
+                <p className="mt-2 text-[11px] text-slate-300 text-center">
+                  Tweaks build on the current image. Keep refining until it looks right.
+                </p>
+              </div>
             </div>
 
             {/* ════════════════════════════════════════

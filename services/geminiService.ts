@@ -8,47 +8,21 @@ if (!API_KEY) {
 const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 // Image generation model — requires billing enabled on your API key
-// See: https://aistudio.google.com → Billing
 const MODEL = 'gemini-2.5-flash-image';
 
-export const applyPaintColor = async (
+// ────────────────────────────────────────────────────────────
+// Shared low-level call
+// ────────────────────────────────────────────────────────────
+const generateImage = async (
   base64ImageData: string,
   mimeType: string,
-  brand: string,
-  colorName: string,
-  hexCode: string
+  fullPrompt: string
 ): Promise<string> => {
-  // System instruction prepended to the prompt (model doesn't support systemInstruction config)
-  const systemInstruction = `You are an expert interior paint visualization AI. Your ONLY task is to change the wall paint color in the provided room photo.
-
-STRICT RULES — follow all of these without exception:
-- Apply the new paint color ONLY to the wall surfaces (vertical wall planes)
-- Preserve ALL furniture, flooring, ceiling, baseboards, door frames, window frames, crown molding, and trim EXACTLY as they appear
-- Preserve all light fixtures, artwork, mirrors, switches, outlets, and decorations without any change
-- Preserve all lighting, shadows, highlights, and reflections on every non-wall surface
-- The new wall color must look photorealistic: show natural light variation, subtle shading from light sources, and faint wall texture beneath the paint
-- Do NOT change anything in the room except the wall color
-- Do NOT add new objects, furniture, or decorations
-- Do NOT alter the room's layout, perspective, or composition in any way`;
-
-  const userPrompt = `Apply the paint color "${colorName}" by ${brand} (hex code: ${hexCode}) to all visible wall surfaces in this room photo.
-
-Paint ONLY the walls. Leave everything else — furniture, floor, ceiling, trim, doors, windows, fixtures, shadows — exactly as it is.
-
-The result should look exactly like a real photograph of this room after the walls were professionally painted with ${brand} "${colorName}" (${hexCode}). Maintain the natural lighting, shadow variation, and subtle wall texture throughout.`;
-
-  const fullPrompt = `${systemInstruction}\n\n${userPrompt}`;
-
   const response = await ai.models.generateContent({
     model: MODEL,
     contents: {
       parts: [
-        {
-          inlineData: {
-            data: base64ImageData,
-            mimeType: mimeType,
-          },
-        },
+        { inlineData: { data: base64ImageData, mimeType } },
         { text: fullPrompt },
       ],
     },
@@ -73,8 +47,78 @@ The result should look exactly like a real photograph of this room after the wal
     const detail = textResponse
       ? `AI response: "${textResponse}"`
       : 'The image may be unclear or the request was blocked by safety filters.';
-    throw new Error(`The AI did not return a painted image. ${detail} Please try a different photo or color.`);
+    throw new Error(`The AI did not return a painted image. ${detail} Please try a different photo or request.`);
   }
 
   return imageUrl;
+};
+
+// ────────────────────────────────────────────────────────────
+// Apply paint color to ALL walls
+// ────────────────────────────────────────────────────────────
+export const applyPaintColor = async (
+  base64ImageData: string,
+  mimeType: string,
+  brand: string,
+  colorName: string,
+  hexCode: string
+): Promise<string> => {
+  const systemInstruction = `You are an expert interior paint visualization AI. Your ONLY task is to repaint EVERY wall in the provided room photo with the specified color.
+
+CRITICAL — PAINT EVERY SINGLE WALL:
+- You MUST apply the new paint color to ALL wall surfaces visible in the photo — without exception
+- This includes: the back wall, the left wall, the right wall, side walls, partial walls at the edges of the frame, walls behind furniture, walls around fireplaces, walls next to doorways, walls around windows, and any wall surface in adjacent rooms or hallways visible through doorways
+- If you can see a wall, you MUST paint it the new color
+- Do NOT leave any wall in the original color
+- Do NOT treat any wall as an "accent" — every wall gets the same new color
+- Check every corner and edge of the image to ensure no wall has been missed
+
+PRESERVE EVERYTHING ELSE EXACTLY:
+- Keep ALL furniture, flooring, ceiling, baseboards, door frames, window frames, crown molding, and trim exactly as they appear
+- Keep all light fixtures, artwork, mirrors, switches, outlets, and decorations unchanged
+- Keep all lighting, shadows, highlights, and reflections on every non-wall surface
+- Do NOT alter the room's layout, perspective, composition, or any object
+
+REALISM:
+- The new wall color must look photorealistic with natural light variation, subtle shading from light sources, and faint wall texture beneath the paint
+- Walls should show realistic shadows from light direction and any objects in the room`;
+
+  const userPrompt = `Repaint EVERY visible wall in this room with the paint color "${colorName}" by ${brand} (hex code: ${hexCode}).
+
+This means: paint the back wall, paint the left wall, paint the right wall, paint any side or partial walls, paint walls around doorways, fireplaces, and windows, and paint any wall visible in adjacent rooms or hallways. EVERY wall gets the new color.
+
+Do not leave any wall in its original color. Do not paint just one wall as an accent — paint them ALL.
+
+Leave everything that is NOT a wall completely untouched: furniture, floor, ceiling, trim, doors, windows, fixtures, decorations, shadows.
+
+The final image should look like a real photograph of this room after every wall has been professionally painted with ${brand} "${colorName}" (${hexCode}).`;
+
+  return generateImage(base64ImageData, mimeType, `${systemInstruction}\n\n${userPrompt}`);
+};
+
+// ────────────────────────────────────────────────────────────
+// Apply a tweak / refinement to an already-painted image
+// ────────────────────────────────────────────────────────────
+export const tweakPaintedImage = async (
+  base64ImageData: string,
+  mimeType: string,
+  tweakDescription: string
+): Promise<string> => {
+  const systemInstruction = `You are refining an already-painted room photo. The user wants to make a SPECIFIC adjustment to the image they're looking at.
+
+STRICT RULES:
+- Apply ONLY the specific change the user describes — nothing more
+- PRESERVE ALL existing paint colors and details exactly as they appear in the current image, UNLESS the user explicitly asks to change them
+- Do NOT revert any previous edits
+- Do NOT change anything else in the image other than what the user explicitly requested
+- The result must look photorealistic with natural lighting, shadows, and textures
+- Keep all furniture, flooring, ceiling, trim, fixtures, and decorations in place unless the user says otherwise`;
+
+  const userPrompt = `Apply this specific adjustment to the painted room photo:
+
+"${tweakDescription}"
+
+Make ONLY this change. Preserve every other detail in the current image — keep all existing paint colors, all furniture, all fixtures, all lighting, exactly as they are. The output should look like a real photograph that incorporates this one specific change.`;
+
+  return generateImage(base64ImageData, mimeType, `${systemInstruction}\n\n${userPrompt}`);
 };
