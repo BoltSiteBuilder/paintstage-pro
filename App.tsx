@@ -200,11 +200,11 @@ const Spinner: React.FC<{ size?: string }> = () => (
         {/* Roller frame */}
         <rect x="2" y="8" width="40" height="34" rx="8" fill="#e2e8f0" />
         {/* Roller cylinder */}
-        <rect x="6" y="12" width="32" height="26" rx="6" fill="#e07040" />
+        <rect x="6" y="12" width="32" height="26" rx="6" fill="#2563EB" />
         {/* Shine stripe */}
         <rect x="10" y="16" width="10" height="6" rx="3" fill="rgba(255,255,255,0.4)" />
         {/* Drip */}
-        <ellipse className="roller-drip" cx="20" cy="40" rx="4" ry="5" fill="#e07040" />
+        <ellipse className="roller-drip" cx="20" cy="40" rx="4" ry="5" fill="#2563EB" />
       </svg>
     </div>
   </div>
@@ -547,17 +547,12 @@ export default function App() {
       <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Logo */}
-          <button onClick={resetToUpload} className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 bg-brand-accent rounded-lg flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 14c-1.66 0-3 1.34-3 3 0 1.31-1.16 2-2 2 .92 1.22 2.49 2 4 2 2.21 0 4-1.79 4-4 0-1.66-1.34-3-3-3zm13.71-9.37l-1.34-1.34c-.39-.39-1.02-.39-1.41 0L9 12.25 11.75 15l8.96-8.96c.39-.39.39-1.02 0-1.41z"/>
-              </svg>
-            </div>
-            <div>
-              <span className="text-base font-black text-brand-dark leading-none">
-                PaintStage <span className="text-brand-accent">Pro</span>
-              </span>
-            </div>
+          <button onClick={resetToUpload} className="group">
+            <img
+              src="/ChatGPT_Image_May_14,_2026,_03_35_04_PM.png"
+              alt="PaintStage Pro"
+              className="h-12 w-auto object-contain group-hover:opacity-90 transition-opacity"
+            />
           </button>
 
           {/* Right side */}
@@ -1282,11 +1277,16 @@ export default function App() {
       </main>
 
       {/* ── Footer ──────────────────────────────────────────── */}
-      <footer className="mt-16 py-8 border-t border-slate-200 text-center">
-<p className="text-slate-300 text-xs mt-1">
+      <footer className="mt-16 py-10 border-t border-slate-200 text-center">
+        <img
+          src="/ChatGPT_Image_May_14,_2026,_03_35_04_PM.png"
+          alt="PaintStage Pro"
+          className="h-14 w-auto object-contain mx-auto mb-4 opacity-80"
+        />
+        <p className="text-slate-400 text-xs">
           AI color visualizations are approximate previews. Actual results may vary based on lighting, surface texture, and paint sheen.
         </p>
-        <p className="text-slate-300 text-xs mt-1">Powered by <a href="https://AxiiumSystems.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-500 transition-colors underline underline-offset-2">Axiium Systems</a></p>
+        <p className="text-slate-300 text-xs mt-2">Powered by <a href="https://AxiiumSystems.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-500 transition-colors underline underline-offset-2">Axiium Systems</a></p>
       </footer>
 
     </div>

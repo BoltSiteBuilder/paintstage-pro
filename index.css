@@ -42,7 +42,7 @@ html {
   width: 32px;
   transform: translateX(-50%);
   border-radius: 12px;
-  background: linear-gradient(180deg, #e07040 0%, #f4a97a 100%);
+  background: linear-gradient(180deg, #2563EB 0%, #60a5fa 100%);
   animation: trail-grow 1.4s ease-in-out infinite alternate;
   transform-origin: top center;
 }
