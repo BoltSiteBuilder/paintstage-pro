@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   applyPaintColor,
   applyTrimColor,
@@ -191,6 +191,67 @@ const Spinner: React.FC<{ size?: string }> = ({ size = 'w-16 h-16' }) => (
     className={`${size} rounded-full border-4 border-brand-light border-t-brand-accent spinner`}
   />
 );
+
+// ─────────────────────────────────────────────────────────────
+// Lightbox
+// ─────────────────────────────────────────────────────────────
+const Lightbox: React.FC<{ src: string; alt: string; onClose: () => void }> = ({ src, alt, onClose }) => {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <button
+        className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+        onClick={onClose}
+        aria-label="Close"
+      >
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <img
+        src={src}
+        alt={alt}
+        className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────
+// Zoomable image wrapper
+// ─────────────────────────────────────────────────────────────
+const ZoomableImage: React.FC<{ src: string; alt: string; className?: string }> = ({ src, alt, className }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <div
+        className="relative group cursor-zoom-in w-full h-full"
+        onClick={() => setOpen(true)}
+      >
+        <img src={src} alt={alt} className={className} />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/20 rounded-none">
+          <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+            <svg className="w-6 h-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <circle cx="11" cy="11" r="6" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" />
+              <path strokeLinecap="round" d="M11 8v6M8 11h6" />
+            </svg>
+          </div>
+        </div>
+      </div>
+      {open && <Lightbox src={src} alt={alt} onClose={() => setOpen(false)} />}
+    </>
+  );
+};
 
 // ─────────────────────────────────────────────────────────────
 // Main App
@@ -771,7 +832,7 @@ export default function App() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-3xl">
               <div className="flex flex-col gap-2">
                 <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 aspect-video flex items-center justify-center">
-                  <img src={originalImage} alt="Before" className="max-h-full max-w-full object-contain" />
+                  <ZoomableImage src={originalImage} alt="Before" className="max-h-full max-w-full object-contain" />
                 </div>
                 <button
                   onClick={() => downloadImage(originalImage, 'before-painting.jpg')}
@@ -785,7 +846,7 @@ export default function App() {
               </div>
               <div className="flex flex-col gap-2">
                 <div className="rounded-2xl overflow-hidden border-2 border-brand-accent/30 shadow-md bg-slate-100 aspect-video flex items-center justify-center">
-                  <img src={resultImage} alt="After" className="max-h-full max-w-full object-contain" />
+                  <ZoomableImage src={resultImage} alt="After" className="max-h-full max-w-full object-contain" />
                 </div>
                 <button
                   onClick={() => downloadImage(resultImage, `after-${colorName.replace(/\s+/g, '-').toLowerCase()}.jpg`)}
