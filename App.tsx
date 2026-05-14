@@ -1365,7 +1365,7 @@ export default function App() {
                 {/* Suggestion chips */}
                 <div className="flex flex-wrap gap-2 mb-3">
                   {[
-                    'Also paint the wall to the left of the fireplace',
+                    'Paint all trim white',
                     'Make the color a little lighter',
                     'Make the color a little darker',
                     'Paint the ceiling white',
