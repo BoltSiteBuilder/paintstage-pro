@@ -549,7 +549,7 @@ export default function App() {
           {/* Logo */}
           <button onClick={resetToUpload} className="group">
             <img
-              src="/ChatGPT_Image_May_14,_2026,_03_35_04_PM.png"
+              src="/ChatGPT_Image_May_14,_2026,_03_45_00_PM.png"
               alt="PaintStage Pro"
               className="h-20 w-auto object-contain group-hover:opacity-90 transition-opacity"
             />
@@ -1273,7 +1273,7 @@ export default function App() {
       {/* ── Footer ──────────────────────────────────────────── */}
       <footer className="mt-16 py-10 border-t border-slate-200 text-center">
         <img
-          src="/ChatGPT_Image_May_14,_2026,_03_35_04_PM.png"
+          src="/ChatGPT_Image_May_14,_2026,_03_45_00_PM.png"
           alt="PaintStage Pro"
           className="h-24 w-auto object-contain mx-auto mb-4 opacity-80"
         />
