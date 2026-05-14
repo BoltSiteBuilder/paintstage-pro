@@ -184,28 +184,51 @@ const BeforeAfterSlider: React.FC<{ before: string; after: string }> = ({ before
 };
 
 // ─────────────────────────────────────────────────────────────
-// Paint Roller Animation
+// Paint Brush Sweep Animation
 // ─────────────────────────────────────────────────────────────
-const Spinner: React.FC<{ size?: string }> = () => (
-  <div className="roller-scene">
-    {/* Paint trail on the wall */}
-    <div className="roller-trail" />
-    {/* The roller itself bobs up/down */}
-    <div className="roller-bob">
-      <svg width="80" height="52" viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Handle rod — horizontal */}
-        <rect x="44" y="22" width="32" height="6" rx="3" fill="#94a3b8" />
-        {/* Elbow — vertical */}
-        <rect x="38" y="4" width="6" height="24" rx="3" fill="#94a3b8" />
-        {/* Roller frame */}
-        <rect x="2" y="8" width="40" height="34" rx="8" fill="#e2e8f0" />
-        {/* Roller cylinder */}
-        <rect x="6" y="12" width="32" height="26" rx="6" fill="#2563EB" />
-        {/* Shine stripe */}
-        <rect x="10" y="16" width="10" height="6" rx="3" fill="rgba(255,255,255,0.4)" />
-        {/* Drip */}
-        <ellipse className="roller-drip" cx="20" cy="40" rx="4" ry="5" fill="#2563EB" />
+const Spinner: React.FC<{ paintColor?: string }> = ({ paintColor = '#2563EB' }) => (
+  <div className="brush-scene" style={{ '--paint-color': paintColor } as React.CSSProperties}>
+    {/* Background canvas */}
+    <div className="brush-canvas">
+      {/* Paint fill sweeping left-to-right */}
+      <div className="brush-fill" />
+      {/* Shimmer sheen */}
+      <div className="brush-sheen" />
+      {/* Scattered paint splash dots */}
+      {[
+        { left: '15%', top: '18%', size: 8,  delay: '0.3s', dur: '2s'  },
+        { left: '30%', top: '72%', size: 6,  delay: '0.7s', dur: '1.7s'},
+        { left: '55%', top: '22%', size: 10, delay: '0.5s', dur: '2.1s'},
+        { left: '72%', top: '65%', size: 7,  delay: '0.9s', dur: '1.9s'},
+        { left: '88%', top: '30%', size: 5,  delay: '1.1s', dur: '2.2s'},
+      ].map((d, i) => (
+        <div
+          key={i}
+          className="paint-dot"
+          style={{ left: d.left, top: d.top, width: d.size, height: d.size, '--dot-delay': d.delay, '--dot-dur': d.dur } as React.CSSProperties}
+        />
+      ))}
+    </div>
+
+    {/* Brush head riding along */}
+    <div className="brush-head">
+      <svg width="48" height="72" viewBox="0 0 48 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Handle */}
+        <rect x="20" y="0" width="8" height="40" rx="4" fill="#c8a97a" />
+        <rect x="21" y="1" width="3" height="38" rx="1.5" fill="rgba(255,255,255,0.3)" />
+        {/* Ferrule (metal band) */}
+        <rect x="17" y="36" width="14" height="8" rx="2" fill="#9ca3af" />
+        <rect x="17" y="38" width="14" height="2" fill="rgba(255,255,255,0.2)" />
+        {/* Bristles */}
+        <path d="M17 44 Q12 54 10 66 Q18 62 24 68 Q30 62 38 66 Q36 54 31 44 Z" fill={paintColor} />
+        <path d="M20 44 Q18 56 17 64" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M24 44 Q24 58 24 66" stroke="rgba(255,255,255,0.2)"  strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M28 44 Q30 56 31 64" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round" />
+        {/* Paint drip from tip */}
+        <div className="brush-drip" />
       </svg>
+      {/* CSS drip below the SVG */}
+      <div className="brush-drip" style={{ position: 'absolute', bottom: -4, left: '50%', transform: 'translateX(-50%)' }} />
     </div>
   </div>
 );
@@ -968,7 +991,7 @@ export default function App() {
         ════════════════════════════════════════ */}
         {step === 'loading' && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <Spinner size="w-16 h-16" />
+            <Spinner paintColor={hexCode.length === 7 ? hexCode : '#2563EB'} />
             <h2 className="text-2xl font-black text-brand-dark mt-8 mb-2">Painting your walls…</h2>
             <p className="text-lg text-slate-500 mb-1">
               Applying <span className="font-bold text-brand-accent">{colorName}</span>

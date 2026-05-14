@@ -23,55 +23,111 @@ html {
   background: #b5a99e;
 }
 
-/* ── Paint Roller Scene ── */
-.roller-scene {
+/* ── Paint Brush Sweep Animation ── */
+.brush-scene {
   position: relative;
-  width: 120px;
-  height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 280px;
+  height: 120px;
 }
 
-/* Vertical paint trail on a "wall" strip */
-.roller-trail {
+/* Canvas / wall background */
+.brush-canvas {
   position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #f1f5f9;
+}
+
+/* Paint fill that sweeps left-to-right */
+.brush-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: linear-gradient(90deg, var(--paint-color, #2563EB) 0%, color-mix(in srgb, var(--paint-color, #2563EB) 70%, white) 100%);
+  transform-origin: left center;
+  animation: fill-sweep 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes fill-sweep {
+  0%   { transform: scaleX(0); opacity: 0.9; }
+  55%  { transform: scaleX(1); opacity: 1; }
+  80%  { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+/* Brush head that rides along the sweep */
+.brush-head {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+  animation: brush-move 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25));
+  z-index: 10;
+}
+
+@keyframes brush-move {
+  0%   { left: 0%;   opacity: 0; }
+  5%   { opacity: 1; }
+  55%  { left: 100%; opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+/* Paint drip that falls from the brush mid-sweep */
+.brush-drip {
+  position: absolute;
+  bottom: -6px;
   left: 50%;
-  top: 8px;
-  bottom: 8px;
-  width: 32px;
+  width: 10px;
+  height: 16px;
+  background: var(--paint-color, #2563EB);
+  border-radius: 0 0 8px 8px;
   transform: translateX(-50%);
-  border-radius: 12px;
-  background: linear-gradient(180deg, #2563EB 0%, #60a5fa 100%);
-  animation: trail-grow 1.4s ease-in-out infinite alternate;
   transform-origin: top center;
+  animation: drip-fall 2s ease-in-out infinite;
+  opacity: 0;
 }
 
-@keyframes trail-grow {
-  0%   { transform: translateX(-50%) scaleY(0.3); opacity: 0.25; }
-  100% { transform: translateX(-50%) scaleY(1);   opacity: 0.55; }
+@keyframes drip-fall {
+  0%   { height: 0;   opacity: 0; }
+  30%  { height: 0;   opacity: 0; }
+  50%  { height: 18px; opacity: 1; }
+  75%  { height: 28px; opacity: 0.7; }
+  100% { height: 28px; opacity: 0; }
 }
 
-/* Roller bobs up and down */
-.roller-bob {
+/* Shimmer sheen sweeping over the painted area */
+.brush-sheen {
   position: absolute;
-  animation: roller-bob 1.4s ease-in-out infinite alternate;
+  inset: 0;
+  border-radius: 20px;
+  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.35) 50%, transparent 65%);
+  animation: sheen-sweep 2s ease-in-out infinite;
+  pointer-events: none;
 }
 
-@keyframes roller-bob {
-  0%   { transform: translateY(-52px); }
-  100% { transform: translateY(52px); }
+@keyframes sheen-sweep {
+  0%   { transform: translateX(-100%); }
+  60%  { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
 }
 
-/* Drip wobble */
-.roller-drip {
-  animation: drip-pulse 1.4s ease-in-out infinite alternate;
-  transform-origin: 20px 38px;
+/* Floating paint dots */
+.paint-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--paint-color, #2563EB);
+  animation: dot-pop var(--dot-dur, 1.8s) ease-out infinite;
+  animation-delay: var(--dot-delay, 0s);
+  opacity: 0;
 }
 
-@keyframes drip-pulse {
-  0%   { transform: scaleY(0.6); opacity: 0.5; }
-  100% { transform: scaleY(1.3); opacity: 1; }
+@keyframes dot-pop {
+  0%   { transform: scale(0) translateY(0);    opacity: 0; }
+  20%  { transform: scale(1) translateY(-6px); opacity: 0.7; }
+  80%  { transform: scale(1) translateY(-12px); opacity: 0.4; }
+  100% { transform: scale(0) translateY(-18px); opacity: 0; }
 }
 
 /* Spinner (legacy, kept for small inline spinners) */
