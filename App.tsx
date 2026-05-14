@@ -347,15 +347,32 @@ export default function App() {
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) processFile(file);
+    const files = Array.from(e.target.files ?? []).filter(f => f.type.startsWith('image/'));
+    if (!files.length) return;
+    processFile(files[0]);
+    files.slice(1).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        setAdditionalImages(prev => [...prev, { dataUrl: ev.target?.result as string, name: file.name.replace(/\.[^/.]+$/, ''), mimeType: file.type || 'image/jpeg' }]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
   };
 
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const file = Array.from(e.dataTransfer.files).find(f => f.type.startsWith('image/'));
-    if (file) processFile(file);
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    if (!files.length) return;
+    processFile(files[0]);
+    files.slice(1).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        setAdditionalImages(prev => [...prev, { dataUrl: ev.target?.result as string, name: file.name.replace(/\.[^/.]+$/, ''), mimeType: file.type || 'image/jpeg' }]);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   // ── Color selection ──────────────────────────────────────
@@ -638,6 +655,7 @@ export default function App() {
                 ref={fileInputRef}
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
+                multiple
                 className="hidden"
                 onChange={handleFileChange}
               />
@@ -649,10 +667,10 @@ export default function App() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-brand-dark">Drop your photo here</p>
-                  <p className="text-slate-500 mt-1">or click to browse</p>
+                  <p className="text-xl font-bold text-brand-dark">Drop your photos here</p>
+                  <p className="text-slate-500 mt-1">or click to select one or more</p>
                   <p className="text-sm text-slate-400 mt-4">
-                    Interior or exterior • JPG, PNG, or WEBP • Works best with well-lit photos
+                    Interior or exterior • JPG, PNG, or WEBP • Select multiple to add extras
                   </p>
                 </div>
               </div>
