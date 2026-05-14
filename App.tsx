@@ -551,7 +551,7 @@ export default function App() {
             <img
               src="/ChatGPT_Image_May_14,_2026,_03_45_00_PM.png"
               alt="PaintStage Pro"
-              className="h-12 w-auto object-contain group-hover:opacity-90 transition-opacity"
+              className="h-16 w-auto object-contain group-hover:opacity-90 transition-opacity"
             />
           </button>
 
