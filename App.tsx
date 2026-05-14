@@ -237,7 +237,7 @@ const ZoomableImage: React.FC<{ src: string; alt: string; className?: string }> 
         className="relative group cursor-zoom-in w-full h-full"
         onClick={() => setOpen(true)}
       >
-        <img src={src} alt={alt} className={className} />
+        <img src={src} alt={alt} className={`${className} block`} />
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/20 rounded-none">
           <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
             <svg className="w-6 h-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -831,8 +831,8 @@ export default function App() {
             {/* Side-by-side download buttons */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-3xl">
               <div className="flex flex-col gap-2">
-                <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 aspect-video flex items-center justify-center">
-                  <ZoomableImage src={originalImage} alt="Before" className="max-h-full max-w-full object-contain" />
+                <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 aspect-video">
+                  <ZoomableImage src={originalImage} alt="Before" className="w-full h-full object-cover" />
                 </div>
                 <button
                   onClick={() => downloadImage(originalImage, 'before-painting.jpg')}
@@ -845,8 +845,8 @@ export default function App() {
                 </button>
               </div>
               <div className="flex flex-col gap-2">
-                <div className="rounded-2xl overflow-hidden border-2 border-brand-accent/30 shadow-md bg-slate-100 aspect-video flex items-center justify-center">
-                  <ZoomableImage src={resultImage} alt="After" className="max-h-full max-w-full object-contain" />
+                <div className="rounded-2xl overflow-hidden border-2 border-brand-accent/30 shadow-md bg-slate-100 aspect-video">
+                  <ZoomableImage src={resultImage} alt="After" className="w-full h-full object-cover" />
                 </div>
                 <button
                   onClick={() => downloadImage(resultImage, `after-${colorName.replace(/\s+/g, '-').toLowerCase()}.jpg`)}
