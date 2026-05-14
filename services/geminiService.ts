@@ -243,7 +243,9 @@ STRICT RULES:
 
 "${tweakDescription}"
 
-Make ONLY this change. Preserve every other detail in the current image — keep all existing paint colors, all furniture, all fixtures, all lighting, exactly as they are. The output should look like a real photograph that incorporates this one specific change.`;
+Make ONLY this change. Preserve every other detail in the current image — keep all existing paint colors, all furniture, all fixtures, all lighting, exactly as they are. The output should look like a real photograph that incorporates this one specific change.
+
+IMPORTANT: If the adjustment involves painting trim, baseboards, crown molding, door casings, or window casings a specific color (e.g., white), you must paint ALL of those elements that specific color. Every baseboard, every crown molding, every door casing, every window casing — not just some of them. Apply the color change completely and thoroughly to every instance of the requested surface type.`;
 
   return generateImage(base64ImageData, mimeType, `${systemInstruction}\n\n${userPrompt}`);
 };

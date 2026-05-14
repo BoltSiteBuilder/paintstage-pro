@@ -482,17 +482,19 @@ export default function App() {
   };
 
   // ── Apply a tweak to the painted result ──────────────────
-  const handleTweak = useCallback(async () => {
-    if (!resultImage || !tweakPrompt.trim() || isTweaking) return;
+  const handleTweak = useCallback(async (overridePrompt?: string) => {
+    const prompt = (overridePrompt ?? tweakPrompt).trim();
+    if (!resultImage || !prompt || isTweaking) return;
+    if (!overridePrompt) setTweakPrompt('');
     setIsTweaking(true);
     setTweakError(null);
     try {
       const parts = splitDataUrl(resultImage);
       if (!parts) throw new Error('Could not parse the current image.');
-      const tweaked = await tweakPaintedImage(parts.base64, parts.mime, tweakPrompt.trim());
+      const tweaked = await tweakPaintedImage(parts.base64, parts.mime, prompt);
       setResultImage(tweaked);
 
-      const lower = tweakPrompt.toLowerCase();
+      const lower = prompt.toLowerCase();
       const isLighter = /light(er)?/.test(lower);
       const isDarker  = /dark(er)?/.test(lower);
       if (isLighter || isDarker) {
@@ -508,7 +510,7 @@ export default function App() {
         setSelectedSwatch(null);
       }
 
-      setTweakPrompt('');
+      if (!overridePrompt) setTweakPrompt('');
     } catch (err: any) {
       console.error('Tweak error:', err);
       setTweakError(err.message ?? 'Could not apply that tweak. Try rephrasing.');
@@ -1379,7 +1381,7 @@ export default function App() {
                     <button
                       key={suggestion}
                       type="button"
-                      onClick={() => setTweakPrompt(suggestion)}
+                      onClick={() => handleTweak(suggestion)}
                       disabled={isTweaking}
                       className="text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 hover:border-brand-accent hover:text-brand-accent hover:bg-brand-light transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
