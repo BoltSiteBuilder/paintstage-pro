@@ -102,7 +102,7 @@ ABSOLUTELY DO NOT PAINT (keep these EXACTLY as they appear in the original — p
 - OUTDOOR LIGHTING, HOUSE NUMBERS, MAILBOXES, RAILINGS — leave UNCHANGED
 
 🚨 CRITICAL TRIM PRESERVATION RULE:
-The trim, baseboards, crown molding, window frames, door frames, and casings in the original photo are typically WHITE or another distinct color. After your edit, when you look at the trim in your output, it should still be the SAME EXACT color as in the input photo. If the original trim was white, it must STILL be white in the output. The new wall color must NOT bleed, tint, or color-cast onto any trim surface. Treat the boundary between wall and trim as a hard, sharp line — paint stops at the trim's edge.
+The trim, baseboards, crown molding, window frames, door frames, and casings in the original photo are typically WHITE or another distinct color. After your edit, when you look at the trim in your output, it should still be the SAME EXACT color as in the input photo. If the original trim was white, it must STILL be bright white in the output — never tinted, never color-shifted, never the same color as the newly painted walls. The new wall color must NOT bleed, tint, or color-cast onto any trim surface under any circumstance. Treat the boundary between wall and trim as a hard, sharp line — paint stops at the trim's edge. A failure mode to actively AVOID is trim that ends up matching or closely resembling the new wall paint color — this is always incorrect.
 
 REALISM:
 - The new wall color must look photorealistic with natural light variation, subtle shading from light sources, and faint surface texture beneath the paint
@@ -127,7 +127,13 @@ DO NOT PAINT — these must keep their ORIGINAL color with ZERO color bleed or t
 - Porches, decks, landscaping, sky
 - Furniture, fixtures, switches, outlets
 
-🚨 If the trim in the original photo is WHITE, the trim in your output MUST STILL be WHITE — not tinted, not color-shifted, not even slightly. The wall paint stops at the trim's edge with a hard, crisp line.
+🚨 TRIM COLOR PRESERVATION — THIS IS NON-NEGOTIABLE:
+Look at the trim in the ORIGINAL INPUT photo right now. Note its exact color (most commonly white or off-white).
+In your output image, every single piece of trim — baseboards, crown molding, window casings, door casings, door frames — MUST be that SAME original color. Not ${hexCode}. Not a tinted version of ${hexCode}. The EXACT original trim color.
+
+The new wall color (${hexCode}) must ONLY appear on flat wall surfaces. The moment the surface transitions from wall to trim, the color must STOP. Treat painter's tape as being applied along every trim edge — the paint literally cannot cross that line.
+
+If you look at your output and you see trim that is now colored ${hexCode} or any variation of it, that is WRONG. The trim must look identical to how it appeared in the input photo.
 
 The output should look like a real photograph of this space after a professional painter taped off all the trim, doors, and other surfaces with painter's tape, then painted ONLY the walls (interior) or siding (exterior) with ${brand} "${colorName}" (${hexCode}). When the tape is removed, all trim and doors are completely unchanged from the original.`;
 
