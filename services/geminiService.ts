@@ -86,23 +86,28 @@ CRITICAL — PAINT EVERY VISIBLE PRIMARY SURFACE:
 - Do NOT leave any wall/siding in the original color
 - Do NOT treat any wall/siding section as an "accent" — every section gets the same new color
 
-ABSOLUTELY DO NOT PAINT (keep these EXACTLY as they appear in the original):
-- DOORS (door slabs / door panels) — front door, back door, interior doors, garage doors — leave doors in their original color
-- DOOR FRAMES, DOOR CASINGS, DOOR JAMBS, DOOR TRIM — leave untouched
-- WINDOW FRAMES, WINDOW CASINGS, WINDOW SILLS, WINDOW SHUTTERS — leave untouched
-- BASEBOARDS (interior) — leave untouched
-- CROWN MOLDING, CHAIR RAILS, PICTURE RAILS (interior) — leave untouched
-- FASCIA, SOFFITS, FRIEZE BOARDS, CORNER BOARDS, RAKE BOARDS (exterior trim) — leave untouched
-- CEILINGS (interior), ROOFS, SHINGLES, GUTTERS, DOWNSPOUTS (exterior) — leave untouched
-- FLOORING / PORCHES / DECKS / PATIOS / DRIVEWAYS / WALKWAYS — leave untouched
-- LANDSCAPING, GRASS, TREES, BUSHES, FLOWERS, SKY, CLOUDS — leave untouched
-- FURNITURE, fixtures, artwork, mirrors, switches, outlets — leave untouched
-- OUTDOOR LIGHTING, HOUSE NUMBERS, MAILBOXES, RAILINGS — leave untouched
+ABSOLUTELY DO NOT PAINT (keep these EXACTLY as they appear in the original — pixel-perfect color preservation):
+- DOORS (door slabs / door panels) — front door, back door, interior doors, garage doors — leave doors in their EXACT original color
+- DOOR FRAMES, DOOR CASINGS, DOOR JAMBS, DOOR TRIM — these are typically white/painted wood mouldings around doors — leave their color UNCHANGED
+- WINDOW FRAMES, WINDOW CASINGS, WINDOW SILLS, WINDOW MULLIONS, WINDOW SHUTTERS — leave their color UNCHANGED
+- BASEBOARDS — the trim board where wall meets floor — leave their color UNCHANGED
+- CROWN MOLDING, CHAIR RAILS, PICTURE RAILS — decorative wall mouldings — leave their color UNCHANGED
+- FIREPLACE SURROUNDS, MANTLES, BUILT-IN SHELVING — leave their color and material UNCHANGED
+- FASCIA, SOFFITS, FRIEZE BOARDS, CORNER BOARDS, RAKE BOARDS (exterior trim) — leave their color UNCHANGED
+- CEILINGS (interior), ROOFS, SHINGLES, GUTTERS, DOWNSPOUTS (exterior) — leave their color UNCHANGED
+- FLOORING / PORCHES / DECKS / PATIOS / DRIVEWAYS / WALKWAYS — leave their color UNCHANGED
+- STAIR RAILINGS, STAIR TREADS, STAIR RISERS, NEWEL POSTS, BALUSTERS — leave their color UNCHANGED
+- LANDSCAPING, GRASS, TREES, BUSHES, FLOWERS, SKY, CLOUDS — leave UNCHANGED
+- FURNITURE, fixtures, artwork, mirrors, switches, outlets — leave UNCHANGED
+- OUTDOOR LIGHTING, HOUSE NUMBERS, MAILBOXES, RAILINGS — leave UNCHANGED
+
+🚨 CRITICAL TRIM PRESERVATION RULE:
+The trim, baseboards, crown molding, window frames, door frames, and casings in the original photo are typically WHITE or another distinct color. After your edit, when you look at the trim in your output, it should still be the SAME EXACT color as in the input photo. If the original trim was white, it must STILL be white in the output. The new wall color must NOT bleed, tint, or color-cast onto any trim surface. Treat the boundary between wall and trim as a hard, sharp line — paint stops at the trim's edge.
 
 REALISM:
-- The new color must look photorealistic with natural light variation, subtle shading from light sources, and faint surface texture beneath the paint
-- Surfaces should show realistic shadows from light direction and any objects in the scene
-- The transition between the painted surfaces and the unchanged trim/doors/ceiling/roof must be crisp and clean, matching the natural edges of the architecture
+- The new wall color must look photorealistic with natural light variation, subtle shading from light sources, and faint surface texture beneath the paint
+- Walls should show realistic shadows from light direction and objects in the scene
+- The transition between painted walls and unchanged trim/doors/ceiling/roof must be a crisp, clean hard edge — no color bleed, no soft transition, no tinting
 - For exterior twilight or evening photos, preserve the existing sky, lighting, and window glow exactly`;
 
   const userPrompt = `Repaint EVERY visible primary surface in this photo with the paint color "${colorName}" by ${brand} (hex code: ${hexCode}).
@@ -111,9 +116,20 @@ If this is an INTERIOR photo: paint every wall surface — back, left, right, si
 
 If this is an EXTERIOR photo: paint every section of exterior siding/cladding — front, sides, back, gable ends, dormers, second story, all primary exterior wall coverings.
 
-DO NOT PAINT: doors, door frames, door casings, window frames, window casings, window shutters, baseboards, crown molding, ceilings, floors, roofs, fascia, soffits, gutters, porches, decks, landscaping, sky, furniture, or any other element. These must stay EXACTLY their original color.
+DO NOT PAINT — these must keep their ORIGINAL color with ZERO color bleed or tinting:
+- All trim (baseboards, crown molding, chair rails, picture rails)
+- All door frames, door casings, door jambs
+- All window frames, window casings, window sills, mullions, shutters
+- All doors themselves
+- Fireplaces, mantles, built-ins, stair railings, balusters
+- Ceilings, floors, roofs
+- Fascia, soffits, gutters (exterior)
+- Porches, decks, landscaping, sky
+- Furniture, fixtures, switches, outlets
 
-The output should look like a real photograph of this space after only the walls (interior) or siding (exterior) were professionally painted with ${brand} "${colorName}" (${hexCode}) — every door, trim piece, baseboard, ceiling, roof, and surrounding element still in its original color, untouched.`;
+🚨 If the trim in the original photo is WHITE, the trim in your output MUST STILL be WHITE — not tinted, not color-shifted, not even slightly. The wall paint stops at the trim's edge with a hard, crisp line.
+
+The output should look like a real photograph of this space after a professional painter taped off all the trim, doors, and other surfaces with painter's tape, then painted ONLY the walls (interior) or siding (exterior) with ${brand} "${colorName}" (${hexCode}). When the tape is removed, all trim and doors are completely unchanged from the original.`;
 
   return generateImage(base64ImageData, mimeType, `${systemInstruction}\n\n${userPrompt}`);
 };
