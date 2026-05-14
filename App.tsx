@@ -727,7 +727,7 @@ export default function App() {
 
                 {/* Custom color input */}
                 <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Custom Color</p>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Or Add Any Custom Color Name or HEX Code</p>
                   <div className="space-y-3">
                     <input
                       type="text"
