@@ -445,6 +445,16 @@ export default function App() {
     }
   }, [resultImage, doorName, doorHex, isPaintingDoor]);
 
+  // ── Adjust hex toward lighter or darker ──────────────────
+  const adjustHex = (hex: string, amount: number): string => {
+    const h = hex.replace('#', '');
+    const num = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+    const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+    const g = Math.min(255, Math.max(0, ((num >> 8) & 0xff) + amount));
+    const b = Math.min(255, Math.max(0, (num & 0xff) + amount));
+    return `#${[r, g, b].map(v => v.toString(16).padStart(2, '0')).join('')}`;
+  };
+
   // ── Apply a tweak to the painted result ──────────────────
   const handleTweak = useCallback(async () => {
     if (!resultImage || !tweakPrompt.trim() || isTweaking) return;
@@ -455,6 +465,19 @@ export default function App() {
       if (!parts) throw new Error('Could not parse the current image.');
       const tweaked = await tweakPaintedImage(parts.base64, parts.mime, tweakPrompt.trim());
       setResultImage(tweaked);
+
+      const lower = tweakPrompt.toLowerCase();
+      const isLighter = /light(er)?/.test(lower);
+      const isDarker  = /dark(er)?/.test(lower);
+      if (isLighter || isDarker) {
+        const step = 30;
+        const newHex = adjustHex(hexCode, isLighter ? step : -step);
+        const shade = isLighter ? 'Lighter' : 'Darker';
+        setHexCode(newHex);
+        setColorName(`${colorName} (${shade})`);
+        setSelectedSwatch(null);
+      }
+
       setTweakPrompt('');
     } catch (err: any) {
       console.error('Tweak error:', err);
@@ -462,7 +485,7 @@ export default function App() {
     } finally {
       setIsTweaking(false);
     }
-  }, [resultImage, tweakPrompt, isTweaking]);
+  }, [resultImage, tweakPrompt, isTweaking, hexCode, colorName]);
 
   // ── Lead form submit ─────────────────────────────────────
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
