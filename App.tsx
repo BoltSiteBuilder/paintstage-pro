@@ -545,13 +545,13 @@ export default function App() {
 
       {/* ── Header ─────────────────────────────────────────── */}
       <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-24 flex items-center justify-between">
           {/* Logo */}
           <button onClick={resetToUpload} className="group">
             <img
               src="/ChatGPT_Image_May_14,_2026,_03_35_04_PM.png"
               alt="PaintStage Pro"
-              className="h-12 w-auto object-contain group-hover:opacity-90 transition-opacity"
+              className="h-20 w-auto object-contain group-hover:opacity-90 transition-opacity"
             />
           </button>
 
@@ -1281,7 +1281,7 @@ export default function App() {
         <img
           src="/ChatGPT_Image_May_14,_2026,_03_35_04_PM.png"
           alt="PaintStage Pro"
-          className="h-14 w-auto object-contain mx-auto mb-4 opacity-80"
+          className="h-24 w-auto object-contain mx-auto mb-4 opacity-80"
         />
         <p className="text-slate-400 text-xs">
           AI color visualizations are approximate previews. Actual results may vary based on lighting, surface texture, and paint sheen.
