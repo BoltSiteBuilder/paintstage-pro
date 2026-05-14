@@ -283,6 +283,11 @@ export default function App() {
   const [originalMimeType, setOriginalMimeType] = useState('image/jpeg');
   const [resultImage,     setResultImage]     = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [imageName, setImageName] = useState('My Room');
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [additionalImages, setAdditionalImages] = useState<{ dataUrl: string; name: string }[]>([]);
+  const [isDraggingAdditional, setIsDraggingAdditional] = useState(false);
+  const additionalInputRef = useRef<HTMLInputElement>(null);
 
   // Paint selection state
   const [selectedBrand, setSelectedBrand] = useState<PaintBrand>('Sherwin Williams');
@@ -534,6 +539,8 @@ export default function App() {
     setResultImage(null);
     setError(null);
     setSubmitStatus('idle');
+    setImageName('My Room');
+    setAdditionalImages([]);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -659,10 +666,107 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
               {/* ── Photo preview ── */}
               <div>
-                <h2 className="text-lg font-bold text-brand-dark mb-3">Your Room</h2>
+                <div className="flex items-center gap-2 mb-3">
+                  {isEditingName ? (
+                    <input
+                      autoFocus
+                      value={imageName}
+                      onChange={e => setImageName(e.target.value)}
+                      onBlur={() => setIsEditingName(false)}
+                      onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsEditingName(false); }}
+                      className="text-lg font-bold text-brand-dark border-b-2 border-brand-accent bg-transparent outline-none w-full"
+                    />
+                  ) : (
+                    <button
+                      onClick={() => setIsEditingName(true)}
+                      className="flex items-center gap-1.5 group"
+                      title="Click to rename"
+                    >
+                      <h2 className="text-lg font-bold text-brand-dark">{imageName}</h2>
+                      <svg className="w-4 h-4 text-slate-400 group-hover:text-brand-accent transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 012.828 0l.172.172a2 2 0 010 2.828L12 15H9v-2z" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
                 <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 aspect-video flex items-center justify-center">
                   <img src={originalImage} alt="Your room" className="max-h-full max-w-full object-contain" />
                 </div>
+
+                {/* Additional images drop zone */}
+                <div className="mt-3">
+                  <input
+                    ref={additionalInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={e => {
+                      Array.from(e.target.files ?? []).forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = ev => {
+                          setAdditionalImages(prev => [...prev, { dataUrl: ev.target?.result as string, name: file.name.replace(/\.[^/.]+$/, '') }]);
+                        };
+                        reader.readAsDataURL(file);
+                      });
+                      e.target.value = '';
+                    }}
+                  />
+                  <div
+                    onDragOver={e => { e.preventDefault(); setIsDraggingAdditional(true); }}
+                    onDragLeave={() => setIsDraggingAdditional(false)}
+                    onDrop={e => {
+                      e.preventDefault();
+                      setIsDraggingAdditional(false);
+                      Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')).forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = ev => {
+                          setAdditionalImages(prev => [...prev, { dataUrl: ev.target?.result as string, name: file.name.replace(/\.[^/.]+$/, '') }]);
+                        };
+                        reader.readAsDataURL(file);
+                      });
+                    }}
+                    onClick={() => additionalInputRef.current?.click()}
+                    className={`rounded-xl border-2 border-dashed cursor-pointer transition-all flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium ${
+                      isDraggingAdditional
+                        ? 'border-brand-accent bg-brand-light text-brand-accent'
+                        : 'border-slate-300 bg-white text-slate-500 hover:border-brand-accent hover:text-brand-accent hover:bg-brand-light'
+                    }`}
+                  >
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Drop additional photos here or click to browse
+                  </div>
+
+                  {additionalImages.length > 0 && (
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      {additionalImages.map((img, idx) => (
+                        <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                          <img src={img.dataUrl} alt={img.name} className="w-full aspect-video object-cover" />
+                          <div className="absolute bottom-0 inset-x-0 bg-black/50 px-2 py-1 flex items-center gap-1">
+                            <input
+                              value={img.name}
+                              onChange={e => setAdditionalImages(prev => prev.map((im, i) => i === idx ? { ...im, name: e.target.value } : im))}
+                              className="bg-transparent text-white text-xs font-medium outline-none w-full truncate"
+                              onClick={e => e.stopPropagation()}
+                            />
+                            <svg className="w-3 h-3 text-white/60 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 012.828 0l.172.172a2 2 0 010 2.828L12 15H9v-2z" />
+                            </svg>
+                          </div>
+                          <button
+                            onClick={() => setAdditionalImages(prev => prev.filter((_, i) => i !== idx))}
+                            className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <button
                   onClick={resetToUpload}
                   className="mt-3 text-sm text-slate-400 hover:text-brand-dark transition-colors font-medium"
