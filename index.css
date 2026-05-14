@@ -23,111 +23,108 @@ html {
   background: #b5a99e;
 }
 
-/* ── Paint Brush Sweep Animation ── */
-.brush-scene {
+/* ── PaintStage Pro Loading Animation ── */
+
+/* Wall preview rectangle */
+.ps-wall {
   position: relative;
-  width: 280px;
-  height: 120px;
-}
-
-/* Canvas / wall background */
-.brush-canvas {
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
+  width: 320px;
+  height: 72px;
+  border-radius: 14px;
   overflow: hidden;
-  background: #f1f5f9;
+  background: #e8ecf0;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
 }
 
-/* Paint fill that sweeps left-to-right */
-.brush-fill {
+/* Paint fill sweeping left to right */
+.ps-fill {
   position: absolute;
   inset: 0;
-  border-radius: 20px;
-  background: linear-gradient(90deg, var(--paint-color, #2563EB) 0%, color-mix(in srgb, var(--paint-color, #2563EB) 70%, white) 100%);
+  background: var(--ps-color, #2563EB);
   transform-origin: left center;
-  animation: fill-sweep 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  transform: scaleX(0);
+  animation: ps-fill-sweep 2.6s cubic-bezier(0.45, 0.05, 0.35, 0.95) infinite;
+  border-radius: 14px;
 }
 
-@keyframes fill-sweep {
-  0%   { transform: scaleX(0); opacity: 0.9; }
-  55%  { transform: scaleX(1); opacity: 1; }
-  80%  { transform: scaleX(1); opacity: 1; }
-  100% { transform: scaleX(1); opacity: 0; }
+@keyframes ps-fill-sweep {
+  0%   { transform: scaleX(0);    opacity: 1; }
+  62%  { transform: scaleX(1);    opacity: 1; }
+  80%  { transform: scaleX(1);    opacity: 1; }
+  96%  { transform: scaleX(1);    opacity: 0; }
+  100% { transform: scaleX(0);    opacity: 0; }
 }
 
-/* Brush head that rides along the sweep */
-.brush-head {
+/* Subtle wet-paint gloss over the filled area */
+.ps-gloss {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.18) 0%,
+    rgba(255,255,255,0.06) 50%,
+    rgba(0,0,0,0.04) 100%
+  );
+  border-radius: 14px;
+  pointer-events: none;
+}
+
+/* Leading-edge highlight that rides with the roller */
+.ps-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: rgba(255,255,255,0.55);
+  border-radius: 2px;
+  left: 0;
+  animation: ps-edge-move 2.6s cubic-bezier(0.45, 0.05, 0.35, 0.95) infinite;
+  filter: blur(1px);
+}
+
+@keyframes ps-edge-move {
+  0%   { left: 0%;    opacity: 0; }
+  4%   { opacity: 1; }
+  62%  { left: 100%;  opacity: 1; }
+  63%  { opacity: 0; }
+  100% { left: 100%;  opacity: 0; }
+}
+
+/* Roller wrapper that travels horizontally */
+.ps-roller-wrap {
   position: absolute;
   top: 50%;
   left: 0;
   transform: translate(-50%, -50%);
-  animation: brush-move 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25));
   z-index: 10;
+  animation: ps-roller-move 2.6s cubic-bezier(0.45, 0.05, 0.35, 0.95) infinite;
 }
 
-@keyframes brush-move {
-  0%   { left: 0%;   opacity: 0; }
-  5%   { opacity: 1; }
-  55%  { left: 100%; opacity: 1; }
-  100% { left: 100%; opacity: 0; }
+@keyframes ps-roller-move {
+  0%   { left: 2%;   opacity: 0; }
+  4%   { opacity: 1; }
+  62%  { left: 98%;  opacity: 1; }
+  72%  { opacity: 0; }
+  100% { left: 98%;  opacity: 0; }
 }
 
-/* Paint drip that falls from the brush mid-sweep */
-.brush-drip {
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  width: 10px;
-  height: 16px;
-  background: var(--paint-color, #2563EB);
-  border-radius: 0 0 8px 8px;
-  transform: translateX(-50%);
-  transform-origin: top center;
-  animation: drip-fall 2s ease-in-out infinite;
-  opacity: 0;
+/* Status text fade cycle */
+.ps-status {
+  animation: ps-text-breathe 2.6s ease-in-out infinite;
 }
 
-@keyframes drip-fall {
-  0%   { height: 0;   opacity: 0; }
-  30%  { height: 0;   opacity: 0; }
-  50%  { height: 18px; opacity: 1; }
-  75%  { height: 28px; opacity: 0.7; }
-  100% { height: 28px; opacity: 0; }
+@keyframes ps-text-breathe {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1; }
 }
 
-/* Shimmer sheen sweeping over the painted area */
-.brush-sheen {
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
-  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.35) 50%, transparent 65%);
-  animation: sheen-sweep 2s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes sheen-sweep {
-  0%   { transform: translateX(-100%); }
-  60%  { transform: translateX(100%); }
-  100% { transform: translateX(100%); }
-}
-
-/* Floating paint dots */
-.paint-dot {
-  position: absolute;
-  border-radius: 50%;
-  background: var(--paint-color, #2563EB);
-  animation: dot-pop var(--dot-dur, 1.8s) ease-out infinite;
-  animation-delay: var(--dot-delay, 0s);
-  opacity: 0;
-}
-
-@keyframes dot-pop {
-  0%   { transform: scale(0) translateY(0);    opacity: 0; }
-  20%  { transform: scale(1) translateY(-6px); opacity: 0.7; }
-  80%  { transform: scale(1) translateY(-12px); opacity: 0.4; }
-  100% { transform: scale(0) translateY(-18px); opacity: 0; }
+/* Progress bar sweep */
+@keyframes ps-progress {
+  0%   { transform: scaleX(0);   opacity: 1; }
+  62%  { transform: scaleX(1);   opacity: 1; }
+  80%  { transform: scaleX(1);   opacity: 1; }
+  96%  { transform: scaleX(1);   opacity: 0; }
+  100% { transform: scaleX(0);   opacity: 0; }
 }
 
 /* Spinner (legacy, kept for small inline spinners) */

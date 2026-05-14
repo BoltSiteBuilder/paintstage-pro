@@ -184,51 +184,33 @@ const BeforeAfterSlider: React.FC<{ before: string; after: string }> = ({ before
 };
 
 // ─────────────────────────────────────────────────────────────
-// Paint Brush Sweep Animation
+// PaintStage Pro Loading Animation
 // ─────────────────────────────────────────────────────────────
-const Spinner: React.FC<{ paintColor?: string }> = ({ paintColor = '#2563EB' }) => (
-  <div className="brush-scene" style={{ '--paint-color': paintColor } as React.CSSProperties}>
-    {/* Background canvas */}
-    <div className="brush-canvas">
-      {/* Paint fill sweeping left-to-right */}
-      <div className="brush-fill" />
-      {/* Shimmer sheen */}
-      <div className="brush-sheen" />
-      {/* Scattered paint splash dots */}
-      {[
-        { left: '15%', top: '18%', size: 8,  delay: '0.3s', dur: '2s'  },
-        { left: '30%', top: '72%', size: 6,  delay: '0.7s', dur: '1.7s'},
-        { left: '55%', top: '22%', size: 10, delay: '0.5s', dur: '2.1s'},
-        { left: '72%', top: '65%', size: 7,  delay: '0.9s', dur: '1.9s'},
-        { left: '88%', top: '30%', size: 5,  delay: '1.1s', dur: '2.2s'},
-      ].map((d, i) => (
-        <div
-          key={i}
-          className="paint-dot"
-          style={{ left: d.left, top: d.top, width: d.size, height: d.size, '--dot-delay': d.delay, '--dot-dur': d.dur } as React.CSSProperties}
-        />
-      ))}
-    </div>
+const PaintRollerIcon: React.FC<{ color: string }> = ({ color }) => (
+  <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Roller pad */}
+    <rect x="2" y="8" width="22" height="14" rx="5" fill={color} />
+    <rect x="2" y="8" width="22" height="5" rx="5" fill="rgba(255,255,255,0.18)" />
+    {/* Roller frame top bar */}
+    <rect x="10" y="4" width="4" height="6" rx="2" fill="#64748b" />
+    {/* Handle arm going right then down */}
+    <rect x="14" y="4" width="14" height="3" rx="1.5" fill="#64748b" />
+    <rect x="25" y="4" width="3" height="20" rx="1.5" fill="#64748b" />
+    {/* Handle grip */}
+    <rect x="23" y="22" width="7" height="4" rx="2" fill="#94a3b8" />
+  </svg>
+);
 
-    {/* Brush head riding along */}
-    <div className="brush-head">
-      <svg width="48" height="72" viewBox="0 0 48 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Handle */}
-        <rect x="20" y="0" width="8" height="40" rx="4" fill="#c8a97a" />
-        <rect x="21" y="1" width="3" height="38" rx="1.5" fill="rgba(255,255,255,0.3)" />
-        {/* Ferrule (metal band) */}
-        <rect x="17" y="36" width="14" height="8" rx="2" fill="#9ca3af" />
-        <rect x="17" y="38" width="14" height="2" fill="rgba(255,255,255,0.2)" />
-        {/* Bristles */}
-        <path d="M17 44 Q12 54 10 66 Q18 62 24 68 Q30 62 38 66 Q36 54 31 44 Z" fill={paintColor} />
-        <path d="M20 44 Q18 56 17 64" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M24 44 Q24 58 24 66" stroke="rgba(255,255,255,0.2)"  strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M28 44 Q30 56 31 64" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round" />
-        {/* Paint drip from tip */}
-        <div className="brush-drip" />
-      </svg>
-      {/* CSS drip below the SVG */}
-      <div className="brush-drip" style={{ position: 'absolute', bottom: -4, left: '50%', transform: 'translateX(-50%)' }} />
+const Spinner: React.FC<{ paintColor?: string }> = ({ paintColor = '#2563EB' }) => (
+  <div
+    className="ps-wall"
+    style={{ '--ps-color': paintColor } as React.CSSProperties}
+  >
+    <div className="ps-fill" />
+    <div className="ps-gloss" />
+    <div className="ps-edge" />
+    <div className="ps-roller-wrap">
+      <PaintRollerIcon color="#ffffff" />
     </div>
   </div>
 );
@@ -990,19 +972,43 @@ export default function App() {
             STEP: LOADING
         ════════════════════════════════════════ */}
         {step === 'loading' && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <Spinner paintColor={hexCode.length === 7 ? hexCode : '#2563EB'} />
-            <h2 className="text-2xl font-black text-brand-dark mt-8 mb-2">Painting your walls…</h2>
-            <p className="text-lg text-slate-500 mb-1">
-              Applying <span className="font-bold text-brand-accent">{colorName}</span>
-            </p>
-            <p className="text-sm text-slate-400">{selectedBrand} · {hexCode}</p>
-            <p className="text-sm text-slate-400 mt-2">This usually takes about 15–25 seconds</p>
-            {originalImage && (
-              <div className="mt-10 max-w-lg w-full rounded-2xl overflow-hidden border border-slate-200 shadow-sm aspect-video flex items-center justify-center opacity-40 blur-sm">
-                <img src={originalImage} alt="" className="max-h-full max-w-full object-contain" />
+          <div className="flex items-center justify-center py-20">
+            <div className="bg-white rounded-3xl shadow-xl border border-slate-100 px-10 py-10 flex flex-col items-center gap-7" style={{ maxWidth: 420, width: '100%' }}>
+
+              {/* Color swatch + label */}
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-8 h-8 rounded-lg shadow-sm border border-black/8 flex-shrink-0"
+                  style={{ background: hexCode.length === 7 ? hexCode : '#2563EB' }}
+                />
+                <div className="text-left">
+                  <p className="text-[13px] font-semibold text-[#1e2d4a] leading-tight">{colorName}</p>
+                  <p className="text-[11px] text-slate-400 font-medium tracking-wide uppercase">{selectedBrand} · {hexCode}</p>
+                </div>
               </div>
-            )}
+
+              {/* Wall preview with roller sweep */}
+              <Spinner paintColor={hexCode.length === 7 ? hexCode : '#2563EB'} />
+
+              {/* Status text */}
+              <div className="text-center">
+                <p className="ps-status text-[15px] font-bold text-[#1e2d4a] tracking-tight">Painting in Progress...</p>
+                <p className="text-[13px] text-slate-400 mt-1">This will just take a few seconds.</p>
+              </div>
+
+              {/* Progress bar */}
+              <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    background: hexCode.length === 7 ? hexCode : '#2563EB',
+                    animation: 'ps-progress 2.6s cubic-bezier(0.45, 0.05, 0.35, 0.95) infinite',
+                    transformOrigin: 'left center',
+                  }}
+                />
+              </div>
+
+            </div>
           </div>
         )}
 
