@@ -551,7 +551,7 @@ export default function App() {
             <img
               src="/ChatGPT_Image_May_14,_2026,_03_45_00_PM.png"
               alt="PaintStage Pro"
-              className="h-20 w-auto object-contain group-hover:opacity-90 transition-opacity"
+              className="h-12 w-auto object-contain group-hover:opacity-90 transition-opacity"
             />
           </button>
 
@@ -1275,7 +1275,7 @@ export default function App() {
         <img
           src="/ChatGPT_Image_May_14,_2026,_03_45_00_PM.png"
           alt="PaintStage Pro"
-          className="h-24 w-auto object-contain mx-auto mb-4 opacity-80"
+          className="h-14 w-auto object-contain mx-auto mb-4 opacity-80"
         />
         <p className="text-slate-400 text-xs">
           AI color visualizations are approximate previews. Actual results may vary based on lighting, surface texture, and paint sheen.
