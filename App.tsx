@@ -298,6 +298,7 @@ export default function App() {
   const [selectedBrand, setSelectedBrand] = useState<PaintBrand>('Sherwin Williams');
   const [colorName,     setColorName]     = useState('Agreeable Gray');
   const [hexCode,       setHexCode]       = useState('#B9B5A9');
+  const [originalHex,   setOriginalHex]   = useState('#B9B5A9');
   const [selectedSwatch, setSelectedSwatch] = useState<string | null>('Agreeable Gray');
 
   // Tweak state
@@ -379,6 +380,7 @@ export default function App() {
   const handleSwatchClick = (swatch: ColorSwatch) => {
     setColorName(swatch.name);
     setHexCode(swatch.hex);
+    setOriginalHex(swatch.hex);
     setSelectedSwatch(swatch.name);
   };
 
@@ -387,6 +389,7 @@ export default function App() {
     const first = BRAND_COLORS[brand][0];
     setColorName(first.name);
     setHexCode(first.hex);
+    setOriginalHex(first.hex);
     setSelectedSwatch(first.name);
   };
 
@@ -395,6 +398,7 @@ export default function App() {
     const val = raw.startsWith('#') ? raw : `#${raw}`;
     if (/^#[0-9A-Fa-f]{0,6}$/.test(val)) {
       setHexCode(val);
+      if (val.length === 7) setOriginalHex(val);
       setSelectedSwatch(null);
     }
   };
@@ -488,10 +492,14 @@ export default function App() {
       const isDarker  = /dark(er)?/.test(lower);
       if (isLighter || isDarker) {
         const step = 30;
-        const newHex = adjustHex(hexCode, isLighter ? step : -step);
-        const shade = isLighter ? 'Lighter' : 'Darker';
+        const base = originalHex.length === 7 ? originalHex : hexCode;
+        const newHex = adjustHex(base, isLighter ? step : -step);
+        const direction = isLighter ? 'Lighter' : 'Darker';
+        // Strip any previous adjustment suffix from the base name
+        const baseName = colorName.replace(/\s*\(Adjusted\s+(Lighter|Darker)[^)]*\)\s*$/i, '').trim();
         setHexCode(newHex);
-        setColorName(`${colorName} (${shade})`);
+        setOriginalHex(base);
+        setColorName(`${baseName} (Adjusted ${direction} from Original ${base})`);
         setSelectedSwatch(null);
       }
 
