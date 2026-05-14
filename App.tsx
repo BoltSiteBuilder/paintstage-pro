@@ -1023,17 +1023,6 @@ export default function App() {
                 <p className="text-[13px] text-slate-400 mt-1">This will just take a few seconds.</p>
               </div>
 
-              {/* Progress bar */}
-              <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full"
-                  style={{
-                    background: hexCode.length === 7 ? hexCode : '#2563EB',
-                    animation: 'ps-progress 2.6s cubic-bezier(0.45, 0.05, 0.35, 0.95) infinite',
-                    transformOrigin: 'left center',
-                  }}
-                />
-              </div>
 
             </div>
           </div>
