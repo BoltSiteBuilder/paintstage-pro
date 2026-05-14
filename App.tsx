@@ -184,25 +184,29 @@ const BeforeAfterSlider: React.FC<{ before: string; after: string }> = ({ before
 };
 
 // ─────────────────────────────────────────────────────────────
-// Paint Roller Spinner
+// Paint Roller Animation
 // ─────────────────────────────────────────────────────────────
 const Spinner: React.FC<{ size?: string }> = () => (
-  <div className="paint-roller-anim flex flex-col items-center" style={{ width: 64, height: 80 }}>
-    <svg width="64" height="80" viewBox="0 0 64 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Handle (vertical rod) */}
-      <rect x="30" y="28" width="4" height="36" rx="2" fill="#94a3b8" />
-      {/* Elbow connector */}
-      <rect x="18" y="14" width="16" height="4" rx="2" fill="#94a3b8" />
-      <rect x="18" y="14" width="4" height="18" rx="2" fill="#94a3b8" />
-      {/* Roller frame */}
-      <rect x="4" y="6" width="30" height="16" rx="4" fill="#cbd5e1" />
-      {/* Roller cylinder */}
-      <rect x="6" y="8" width="26" height="12" rx="3" fill="#e07040" />
-      {/* Roller shine */}
-      <rect x="8" y="10" width="10" height="3" rx="1.5" fill="rgba(255,255,255,0.35)" />
-      {/* Paint streak — grows downward */}
-      <rect className="paint-streak" x="6" y="22" width="26" height="6" rx="1" fill="#e07040" opacity="0.5" />
-    </svg>
+  <div className="roller-scene">
+    {/* Paint trail on the wall */}
+    <div className="roller-trail" />
+    {/* The roller itself bobs up/down */}
+    <div className="roller-bob">
+      <svg width="80" height="52" viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Handle rod — horizontal */}
+        <rect x="44" y="22" width="32" height="6" rx="3" fill="#94a3b8" />
+        {/* Elbow — vertical */}
+        <rect x="38" y="4" width="6" height="24" rx="3" fill="#94a3b8" />
+        {/* Roller frame */}
+        <rect x="2" y="8" width="40" height="34" rx="8" fill="#e2e8f0" />
+        {/* Roller cylinder */}
+        <rect x="6" y="12" width="32" height="26" rx="6" fill="#e07040" />
+        {/* Shine stripe */}
+        <rect x="10" y="16" width="10" height="6" rx="3" fill="rgba(255,255,255,0.4)" />
+        {/* Drip */}
+        <ellipse className="roller-drip" cx="20" cy="40" rx="4" ry="5" fill="#e07040" />
+      </svg>
+    </div>
   </div>
 );
 
