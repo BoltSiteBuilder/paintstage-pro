@@ -1220,24 +1220,26 @@ export default function App() {
                         className="opacity-0 w-full h-full cursor-pointer absolute inset-0"
                       />
                     </label>
-                    <input
-                      type="text"
-                      value={trimHex}
-                      onChange={e => {
-                        const v = e.target.value.startsWith('#') ? e.target.value : `#${e.target.value}`;
-                        if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setTrimHex(v);
-                      }}
-                      maxLength={7}
-                      placeholder="#RRGGBB"
-                      className="w-28 border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm font-mono"
-                    />
-                    <input
-                      type="text"
-                      value={trimName}
-                      onChange={e => setTrimName(e.target.value)}
-                      placeholder="Color name (optional)"
-                      className="flex-1 border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm"
-                    />
+                    <div className="flex flex-col sm:flex-row gap-2 flex-1 min-w-0">
+                      <input
+                        type="text"
+                        value={trimHex}
+                        onChange={e => {
+                          const v = e.target.value.startsWith('#') ? e.target.value : `#${e.target.value}`;
+                          if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setTrimHex(v);
+                        }}
+                        maxLength={7}
+                        placeholder="#RRGGBB"
+                        className="w-full sm:w-28 border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm font-mono"
+                      />
+                      <input
+                        type="text"
+                        value={trimName}
+                        onChange={e => setTrimName(e.target.value)}
+                        placeholder="Color name (optional)"
+                        className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm"
+                      />
+                    </div>
                   </div>
 
                   {/* Quick trim presets */}
@@ -1297,24 +1299,26 @@ export default function App() {
                         className="opacity-0 w-full h-full cursor-pointer absolute inset-0"
                       />
                     </label>
-                    <input
-                      type="text"
-                      value={doorHex}
-                      onChange={e => {
-                        const v = e.target.value.startsWith('#') ? e.target.value : `#${e.target.value}`;
-                        if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setDoorHex(v);
-                      }}
-                      maxLength={7}
-                      placeholder="#RRGGBB"
-                      className="w-28 border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm font-mono"
-                    />
-                    <input
-                      type="text"
-                      value={doorName}
-                      onChange={e => setDoorName(e.target.value)}
-                      placeholder="Color name (optional)"
-                      className="flex-1 border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm"
-                    />
+                    <div className="flex flex-col sm:flex-row gap-2 flex-1 min-w-0">
+                      <input
+                        type="text"
+                        value={doorHex}
+                        onChange={e => {
+                          const v = e.target.value.startsWith('#') ? e.target.value : `#${e.target.value}`;
+                          if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setDoorHex(v);
+                        }}
+                        maxLength={7}
+                        placeholder="#RRGGBB"
+                        className="w-full sm:w-28 border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm font-mono"
+                      />
+                      <input
+                        type="text"
+                        value={doorName}
+                        onChange={e => setDoorName(e.target.value)}
+                        placeholder="Color name (optional)"
+                        className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm"
+                      />
+                    </div>
                   </div>
 
                   {/* Quick door presets */}
