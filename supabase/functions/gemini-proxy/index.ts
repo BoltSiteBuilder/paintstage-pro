@@ -7,23 +7,32 @@ const corsHeaders = {
 };
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-const MODEL = "gemini-2.5-flash-image";
+const MODEL = "gemini-2.0-flash-exp";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
 const GENERIC_ERROR = "We could not generate the image right now. Please try again in a few minutes.";
 
 async function callGemini(base64ImageData: string, mimeType: string, prompt: string): Promise<string> {
   const body = {
-    contents: {
+    contents: [{
       parts: [
         { inlineData: { data: base64ImageData, mimeType } },
         { text: prompt },
       ],
-    },
+    }],
     generationConfig: {
       responseModalities: ["IMAGE", "TEXT"],
     },
   };
+
+  console.log("[gemini-proxy] Sending request to Gemini:", {
+    model: MODEL,
+    mimeType,
+    base64Length: base64ImageData.length,
+    promptLength: prompt.length,
+    keyPresent: !!GEMINI_API_KEY,
+    keyPrefix: GEMINI_API_KEY ? GEMINI_API_KEY.slice(0, 8) + "..." : "MISSING",
+  });
 
   const res = await fetch(GEMINI_URL, {
     method: "POST",
@@ -31,12 +40,26 @@ async function callGemini(base64ImageData: string, mimeType: string, prompt: str
     body: JSON.stringify(body),
   });
 
+  const responseText = await res.text();
+
+  console.log("[gemini-proxy] Gemini response status:", res.status);
+  console.log("[gemini-proxy] Gemini response body:", responseText.slice(0, 2000));
+
   if (!res.ok) {
-    throw new Error(`Gemini API error: ${res.status}`);
+    throw new Error(`Gemini API error ${res.status}: ${responseText.slice(0, 500)}`);
   }
 
-  const json = await res.json();
+  let json: { candidates?: Array<{ content?: { parts?: Array<{ inlineData?: { mimeType: string; data: string }; text?: string }> } }> };
+  try {
+    json = JSON.parse(responseText);
+  } catch {
+    throw new Error("Gemini returned non-JSON response");
+  }
+
   const parts = json.candidates?.[0]?.content?.parts ?? [];
+
+  console.log("[gemini-proxy] Response parts count:", parts.length);
+  console.log("[gemini-proxy] Part types:", parts.map((p) => Object.keys(p).join(",")));
 
   for (const part of parts) {
     if (part.inlineData) {
@@ -44,11 +67,11 @@ async function callGemini(base64ImageData: string, mimeType: string, prompt: str
     }
   }
 
-  const textResponse = parts.find((p: { text?: string }) => p.text)?.text ?? "";
-  throw new Error(textResponse || "No image returned");
+  const textResponse = parts.find((p) => p.text)?.text ?? "";
+  throw new Error(`No image in response. Text: ${textResponse.slice(0, 200)}`);
 }
 
-// ── Prompt builders (mirrored from the original geminiService.ts) ────────────
+// ── Prompt builders ──────────────────────────────────────────
 
 function buildWallPrompt(brand: string, colorName: string, hexCode: string): string {
   const system = `IMPORTANT: This request applies to BOTH interior room photos AND exterior house/building photos. If the image shows an exterior of a house, this is a fully valid and expected request — you must paint it. Never refuse an exterior photo. Exterior paint visualization is one of your primary use cases.
@@ -227,6 +250,7 @@ Deno.serve(async (req: Request) => {
   }
 
   if (!GEMINI_API_KEY) {
+    console.error("[gemini-proxy] GEMINI_API_KEY secret is not set");
     return new Response(JSON.stringify({ error: GENERIC_ERROR }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -237,7 +261,16 @@ Deno.serve(async (req: Request) => {
     const body = await req.json();
     const { operation, base64ImageData, mimeType } = body;
 
+    console.log("[gemini-proxy] Received request:", {
+      operation,
+      mimeType,
+      base64Length: base64ImageData ? base64ImageData.length : 0,
+      hasImage: !!base64ImageData,
+      extraKeys: Object.keys(body).filter((k) => !["operation", "base64ImageData", "mimeType"].includes(k)),
+    });
+
     if (!operation || !base64ImageData || !mimeType) {
+      console.error("[gemini-proxy] Missing required fields:", { operation: !!operation, base64ImageData: !!base64ImageData, mimeType: !!mimeType });
       return new Response(JSON.stringify({ error: GENERIC_ERROR }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -249,29 +282,30 @@ Deno.serve(async (req: Request) => {
     switch (operation) {
       case "applyPaintColor": {
         const { brand, colorName, hexCode } = body;
-        if (!brand || !colorName || !hexCode) throw new Error("Missing params");
+        if (!brand || !colorName || !hexCode) throw new Error("Missing params for applyPaintColor");
         prompt = buildWallPrompt(brand, colorName, hexCode);
         break;
       }
       case "applyTrimColor": {
         const { colorName, hexCode } = body;
-        if (!colorName || !hexCode) throw new Error("Missing params");
+        if (!colorName || !hexCode) throw new Error("Missing params for applyTrimColor");
         prompt = buildTrimPrompt(colorName, hexCode);
         break;
       }
       case "applyDoorColor": {
         const { colorName, hexCode } = body;
-        if (!colorName || !hexCode) throw new Error("Missing params");
+        if (!colorName || !hexCode) throw new Error("Missing params for applyDoorColor");
         prompt = buildDoorPrompt(colorName, hexCode);
         break;
       }
       case "tweakPaintedImage": {
         const { tweakDescription } = body;
-        if (!tweakDescription) throw new Error("Missing params");
+        if (!tweakDescription) throw new Error("Missing params for tweakPaintedImage");
         prompt = buildTweakPrompt(tweakDescription);
         break;
       }
       default:
+        console.error("[gemini-proxy] Unknown operation:", operation);
         return new Response(JSON.stringify({ error: GENERIC_ERROR }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -279,12 +313,15 @@ Deno.serve(async (req: Request) => {
     }
 
     const imageUrl = await callGemini(base64ImageData, mimeType, prompt);
+    console.log("[gemini-proxy] Success — image returned, length:", imageUrl.length);
 
     return new Response(JSON.stringify({ imageUrl }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[gemini-proxy] Caught error:", message);
     return new Response(JSON.stringify({ error: GENERIC_ERROR }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
