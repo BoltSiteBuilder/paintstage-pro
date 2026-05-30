@@ -332,9 +332,10 @@ export default function App() {
   const [selectedSwatch, setSelectedSwatch] = useState<string | null>('Agreeable Gray');
 
   // Tweak state
-  const [tweakPrompt,  setTweakPrompt]  = useState('');
-  const [isTweaking,   setIsTweaking]   = useState(false);
-  const [tweakError,   setTweakError]   = useState<string | null>(null);
+  const [tweakPrompt,     setTweakPrompt]     = useState('');
+  const [lastTweakPrompt, setLastTweakPrompt] = useState('');
+  const [isTweaking,      setIsTweaking]      = useState(false);
+  const [tweakError,      setTweakError]      = useState<string | null>(null);
 
   // Trim state
   const [trimName,    setTrimName]    = useState('Pure White');
@@ -510,6 +511,7 @@ export default function App() {
   const handleTweak = useCallback(async (overridePrompt?: string) => {
     const prompt = (overridePrompt ?? tweakPrompt).trim();
     if (!resultImage || !prompt || isTweaking) return;
+    setLastTweakPrompt(prompt);
     if (!overridePrompt) setTweakPrompt('');
     setIsTweaking(true);
     setTweakError(null);
@@ -746,7 +748,15 @@ export default function App() {
                 <svg className="w-5 h-5 mt-0.5 flex-shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                {error}
+                <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-2">
+                  <span className="flex-1">Something went wrong connecting to the server. Please try again.</span>
+                  <button
+                    onClick={handleGenerate}
+                    className="flex-shrink-0 text-xs font-bold text-red-700 hover:text-red-900 border border-red-300 hover:border-red-400 bg-white rounded-lg px-3 py-1.5 transition-colors"
+                  >
+                    Try Again
+                  </button>
+                </div>
               </div>
             )}
 
@@ -1264,7 +1274,12 @@ export default function App() {
                     ))}
                   </div>
 
-                  {trimError && <p className="text-xs text-red-600 mb-2">{trimError}</p>}
+                  {trimError && (
+                    <div className="flex items-center justify-between gap-3 mb-3 p-3 bg-red-50 border border-red-100 rounded-xl">
+                      <p className="text-xs text-red-600 leading-relaxed flex-1">Something went wrong connecting to the server. Please try again.</p>
+                      <button onClick={handleApplyTrim} className="text-xs font-bold text-red-600 hover:text-red-800 border border-red-200 rounded-lg px-2.5 py-1 flex-shrink-0 transition-colors">Try Again</button>
+                    </div>
+                  )}
 
                   <button
                     onClick={handleApplyTrim}
@@ -1344,7 +1359,12 @@ export default function App() {
                     ))}
                   </div>
 
-                  {doorError && <p className="text-xs text-red-600 mb-2">{doorError}</p>}
+                  {doorError && (
+                    <div className="flex items-center justify-between gap-3 mb-3 p-3 bg-red-50 border border-red-100 rounded-xl">
+                      <p className="text-xs text-red-600 leading-relaxed flex-1">Something went wrong connecting to the server. Please try again.</p>
+                      <button onClick={handleApplyDoor} className="text-xs font-bold text-red-600 hover:text-red-800 border border-red-200 rounded-lg px-2.5 py-1 flex-shrink-0 transition-colors">Try Again</button>
+                    </div>
+                  )}
 
                   <button
                     onClick={handleApplyDoor}
@@ -1418,7 +1438,10 @@ export default function App() {
                 />
 
                 {tweakError && (
-                  <p className="mt-2 text-xs text-red-600 leading-relaxed">{tweakError}</p>
+                  <div className="mt-2 flex items-center justify-between gap-3 p-3 bg-red-50 border border-red-100 rounded-xl">
+                    <p className="text-xs text-red-600 leading-relaxed flex-1">Something went wrong connecting to the server. Please try again.</p>
+                    <button onClick={() => handleTweak(lastTweakPrompt)} className="text-xs font-bold text-red-600 hover:text-red-800 border border-red-200 rounded-lg px-2.5 py-1 flex-shrink-0 transition-colors">Try Again</button>
+                  </div>
                 )}
 
                 <button

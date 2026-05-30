@@ -3,8 +3,9 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 const PROXY_URL = `${SUPABASE_URL}/functions/v1/gemini-proxy`;
 
 const GENERIC_ERROR = 'We could not generate the image right now. Please try again in a few minutes.';
+const RETRY_DELAY_MS = 1500;
 
-async function callProxy(payload: Record<string, string>): Promise<string> {
+async function callProxyOnce(payload: Record<string, string>): Promise<string> {
   const res = await fetch(PROXY_URL, {
     method: 'POST',
     headers: {
@@ -27,6 +28,21 @@ async function callProxy(payload: Record<string, string>): Promise<string> {
   }
 
   return json.imageUrl;
+}
+
+async function callProxy(payload: Record<string, string>): Promise<string> {
+  try {
+    return await callProxyOnce(payload);
+  } catch (err) {
+    console.error('[geminiService] Request failed, retrying in 1.5s…', err);
+    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+    try {
+      return await callProxyOnce(payload);
+    } catch (retryErr) {
+      console.error('[geminiService] Retry also failed:', retryErr);
+      throw new Error(GENERIC_ERROR);
+    }
+  }
 }
 
 export const applyPaintColor = async (
