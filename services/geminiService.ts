@@ -8,11 +8,7 @@ async function callProxyOnce(payload: Record<string, string>): Promise<string> {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      Apikey: SUPABASE_ANON_KEY,
     },
-    body: JSON.stringify(payload),
-  });
 
   let json: { imageUrl?: string; error?: string };
   try {
