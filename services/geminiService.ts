@@ -9,6 +9,8 @@ async function callProxyOnce(payload: Record<string, string>): Promise<string> {
     headers: {
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify(payload),
+  });
 
   let json: { imageUrl?: string; error?: string };
   try {
