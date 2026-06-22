@@ -1,6 +1,4 @@
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-const PROXY_URL = `${SUPABASE_URL}/functions/v1/gemini-proxy`;
+const PROXY_URL = 'https://gemini-proxy.robwarfield.workers.dev';
 
 const GENERIC_ERROR = 'We could not generate the image right now. Please try again in a few minutes.';
 const RETRY_DELAY_MS = 1500;
