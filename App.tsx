@@ -86,6 +86,26 @@ const BRAND_COLORS: Record<PaintBrand, ColorSwatch[]> = {
 };
 
 // ─────────────────────────────────────────────────────────────
+// Color name lookup helpers
+// ─────────────────────────────────────────────────────────────
+
+const normalizeColorName = (value: string) =>
+  value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+
+const getAllColorSwatches = () =>
+  Object.entries(BRAND_COLORS).flatMap(([brand, colors]) =>
+    colors.map(color => ({ ...color, brand }))
+  );
+
+const findColorByName = (name: string) => {
+  const normalizedInput = normalizeColorName(name);
+  if (!normalizedInput) return null;
+  return getAllColorSwatches().find(
+    swatch => normalizeColorName(swatch.name) === normalizedInput
+  ) || null;
+};
+
+// ─────────────────────────────────────────────────────────────
 // Utilities
 // ─────────────────────────────────────────────────────────────
 
@@ -944,7 +964,18 @@ export default function App() {
                     <input
                       type="text"
                       value={colorName}
-                      onChange={e => { setColorName(e.target.value); setSelectedSwatch(null); }}
+                      onChange={e => {
+                        const value = e.target.value;
+                        setColorName(value);
+                        const matchedSwatch = findColorByName(value);
+                        if (matchedSwatch) {
+                          setHexCode(matchedSwatch.hex);
+                          setSelectedSwatch(matchedSwatch.name);
+                          setSelectedBrand(matchedSwatch.brand as PaintBrand);
+                        } else {
+                          setSelectedSwatch(null);
+                        }
+                      }}
                       placeholder="Color name (e.g. Accessible Beige)"
                       className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm"
                     />
