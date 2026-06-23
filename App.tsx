@@ -1637,6 +1637,7 @@ export default function App() {
           AI color visualizations are approximate previews. Actual results may vary based on lighting, surface texture, and paint sheen.
         </p>
         <p className="text-slate-300 text-xs mt-2">Powered by <a href="https://PaintStagePro.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-500 transition-colors underline underline-offset-2">PaintStagePro.com</a></p>
+        <p className="text-slate-300 text-xs mt-4 max-w-xl mx-auto leading-relaxed">PaintStage Pro is an independent tool and is not affiliated with, endorsed by, or sponsored by Sherwin-Williams, Benjamin Moore, Behr, or any paint manufacturer. All paint brand names, color names, and color codes are trademarks or property of their respective owners and are used here for identification and reference purposes only.</p>
       </footer>
 
     </div>
