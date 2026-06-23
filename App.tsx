@@ -970,10 +970,13 @@ export default function App() {
                         const matchedSwatch = findColorByName(value);
                         if (matchedSwatch) {
                           setHexCode(matchedSwatch.hex);
+                          setOriginalHex(matchedSwatch.hex);
                           setSelectedSwatch(matchedSwatch.name);
                           setSelectedBrand(matchedSwatch.brand as PaintBrand);
                         } else {
                           setSelectedSwatch(null);
+                          // Restore to last valid hex if current hex is incomplete
+                          setHexCode(prev => prev.length === 7 ? prev : originalHex);
                         }
                       }}
                       placeholder="Color name (e.g. Accessible Beige)"
