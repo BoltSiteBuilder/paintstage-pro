@@ -387,6 +387,7 @@ export default function App() {
     supabase
       .from('paint_colors')
       .select('color_number, color_name, hex, rgb_r, rgb_g, rgb_b, collection')
+      .order('color_number')
       .then(({ data, error }) => {
         if (error) {
           console.error('Failed to load paint colors:', error);
