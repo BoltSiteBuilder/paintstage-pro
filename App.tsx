@@ -394,6 +394,7 @@ export default function App() {
       .from('paint_colors')
       .select('id, brand, color_number, color_name, formula_code, locator_number, rgb_r, rgb_g, rgb_b, hex, collection, color_family, search_text')
       .order('color_number')
+      .range(0, 1999)
       .then(({ data, error }) => {
         if (error) {
           console.error('Failed to load paint colors:', error);
@@ -401,6 +402,7 @@ export default function App() {
         } else if (!data || data.length === 0) {
           setColorsError('paint_colors table is empty — run the database migration to seed it.');
         } else {
+          console.log(`[PaintStage] Loaded ${data.length} paint colors from Supabase`);
           setAllColors(data as PaintColor[]);
         }
         setColorsLoading(false);
