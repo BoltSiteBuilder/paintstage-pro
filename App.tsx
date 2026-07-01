@@ -5,6 +5,7 @@ import {
   applyDoorColor,
   tweakPaintedImage,
 } from './services/geminiService';
+import { supabase } from './services/supabaseClient';
 
 // ============================================================
 // CONFIGURATION — Customize these for Matt's business
@@ -50,6 +51,16 @@ interface ColorSwatch {
   code: string;
 }
 
+interface PaintColor {
+  color_number: string;
+  color_name: string;
+  hex: string;
+  rgb_r: number;
+  rgb_g: number;
+  rgb_b: number;
+  collection: string;
+}
+
 const SW_COLORS: ColorSwatch[] = [
   { name: 'Agreeable Gray',   hex: '#B9B5A9', code: 'SW 7029' },
   { name: 'Accessible Beige', hex: '#D4C8B0', code: 'SW 7036' },
@@ -91,6 +102,8 @@ const downloadImage = (dataUrl: string, filename: string) => {
 };
 
 const ACCURACY_DISCLAIMER = 'Colors shown are digital approximations and will vary based on your screen, lighting, and surface. Always confirm with a physical paint sample from the manufacturer before purchasing or painting.';
+
+const normalize = (s: string) => s.replace(/\s+/g, '').toLowerCase();
 
 // Downloads the image with the disclaimer baked in as a footer caption
 const downloadWithDisclaimer = (dataUrl: string, filename: string) => {
@@ -355,13 +368,37 @@ export default function App() {
   // Paint selection state
   const [colorName,     setColorName]     = useState('Agreeable Gray');
   const [colorCode,     setColorCode]     = useState('SW 7029');
-  const [hexCode,       setHexCode]       = useState('#B9B5A9');
+  const [hexCode,       setHexCode]       = useState('#D1CBC1');
+  const [originalHex,   setOriginalHex]   = useState('#D1CBC1');
   const [selectedSwatch, setSelectedSwatch] = useState<string | null>('Agreeable Gray');
+  const [colorRgb,      setColorRgb]      = useState<{ r: number; g: number; b: number }>({ r: 209, g: 203, b: 193 });
 
   // Color search state
   const [colorSearch,   setColorSearch]   = useState('');
   const [showDropdown,  setShowDropdown]  = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Supabase color list — fetched once on mount
+  const [allColors,     setAllColors]     = useState<PaintColor[]>([]);
+  const [colorsLoading, setColorsLoading] = useState(true);
+  const [colorsError,   setColorsError]   = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from('paint_colors')
+      .select('color_number, color_name, hex, rgb_r, rgb_g, rgb_b, collection')
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Failed to load paint colors:', error);
+          setColorsError('Could not load color data. Check your Supabase connection.');
+        } else if (!data || data.length === 0) {
+          setColorsError('paint_colors table is empty — run the database migration to seed it.');
+        } else {
+          setAllColors(data as PaintColor[]);
+        }
+        setColorsLoading(false);
+      });
+  }, []);
 
   // Tweak state
   const [tweakPrompt,     setTweakPrompt]     = useState('');
@@ -440,13 +477,22 @@ export default function App() {
   };
 
   // ── Color selection ──────────────────────────────────────
-  const handleSwatchClick = (swatch: ColorSwatch) => {
-    setColorName(swatch.name);
-    setColorCode(swatch.code);
-    setHexCode(swatch.hex);
-    setSelectedSwatch(swatch.name);
+  const handleColorSelect = (name: string, code: string, hex: string, rgb_r?: number, rgb_g?: number, rgb_b?: number) => {
+    setColorName(name);
+    setColorCode(code);
+    setHexCode(hex);
+    setOriginalHex(hex);
+    setSelectedSwatch(name);
     setColorSearch('');
     setShowDropdown(false);
+    if (rgb_r != null && rgb_g != null && rgb_b != null) {
+      setColorRgb({ r: rgb_r, g: rgb_g, b: rgb_b });
+    }
+  };
+
+  const handleSwatchClick = (swatch: ColorSwatch) => {
+    const match = allColors.find(c => normalize(c.color_number) === normalize(swatch.code));
+    handleColorSelect(swatch.name, swatch.code, swatch.hex, match?.rgb_r, match?.rgb_g, match?.rgb_b);
   };
 
   // ── AI generation ────────────────────────────────────────
@@ -934,50 +980,65 @@ export default function App() {
 
                 {/* Color search */}
                 <div ref={searchRef} className="relative">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Search any color by name</p>
-                  <input
-                    type="text"
-                    value={colorSearch}
-                    onChange={e => {
-                      setColorSearch(e.target.value);
-                      setShowDropdown(true);
-                    }}
-                    onFocus={() => setShowDropdown(true)}
-                    onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
-                    placeholder="Search Sherwin-Williams colors…"
-                    className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-brand-dark placeholder:text-slate-400 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm"
-                  />
-                  {showDropdown && (() => {
-                    const q = colorSearch.trim().toLowerCase();
-                    const results = q
-                      ? SW_COLORS.filter(c =>
-                          c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
-                        )
-                      : SW_COLORS;
-                    if (!results.length) return (
-                      <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg py-2 px-4 text-sm text-slate-400">
-                        No matches found
-                      </div>
-                    );
-                    return (
-                      <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg overflow-y-auto" style={{ maxHeight: '272px' }}>
-                        {results.map(c => (
-                          <button
-                            key={c.code}
-                            onMouseDown={() => handleSwatchClick(c)}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors text-left ${selectedSwatch === c.name ? 'bg-brand-light' : ''}`}
-                          >
-                            <span
-                              className="flex-shrink-0 w-6 h-6 rounded-md border border-black/10 shadow-sm"
-                              style={{ backgroundColor: c.hex }}
-                            />
-                            <span className="flex-1 font-medium text-brand-dark truncate">{c.name}</span>
-                            <span className="flex-shrink-0 text-xs text-slate-400 font-mono">{c.code}</span>
-                          </button>
-                        ))}
-                      </div>
-                    );
-                  })()}
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Search by color name or number</p>
+                  {colorsLoading && (
+                    <div className="flex items-center gap-2 py-2 text-sm text-slate-400">
+                      <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-300 border-t-brand-accent spinner" />
+                      Loading colors…
+                    </div>
+                  )}
+                  {colorsError && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700 mb-2">
+                      {colorsError}
+                    </div>
+                  )}
+                  {!colorsLoading && (
+                    <>
+                      <input
+                        type="text"
+                        value={colorSearch}
+                        onChange={e => {
+                          setColorSearch(e.target.value);
+                          setShowDropdown(true);
+                        }}
+                        onFocus={() => setShowDropdown(true)}
+                        onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+                        placeholder="e.g. Naval or SW 6244"
+                        className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-brand-dark placeholder:text-slate-400 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm"
+                      />
+                      {showDropdown && (() => {
+                        const q = normalize(colorSearch.trim());
+                        const results = q
+                          ? allColors.filter(c =>
+                              normalize(c.color_name).includes(q) || normalize(c.color_number).includes(q)
+                            ).slice(0, 8)
+                          : allColors.slice(0, 8);
+                        if (!results.length) return (
+                          <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg py-2 px-4 text-sm text-slate-400">
+                            No matches found
+                          </div>
+                        );
+                        return (
+                          <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg overflow-y-auto" style={{ maxHeight: '272px' }}>
+                            {results.map(c => (
+                              <button
+                                key={c.color_number}
+                                onMouseDown={() => handleColorSelect(c.color_name, c.color_number, c.hex, c.rgb_r, c.rgb_g, c.rgb_b)}
+                                className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors text-left ${selectedSwatch === c.color_name ? 'bg-brand-light' : ''}`}
+                              >
+                                <span
+                                  className="flex-shrink-0 w-6 h-6 rounded-md border border-black/10 shadow-sm"
+                                  style={{ backgroundColor: c.hex }}
+                                />
+                                <span className="flex-1 font-medium text-brand-dark truncate">{c.color_name}</span>
+                                <span className="flex-shrink-0 text-xs text-slate-400 font-mono">{c.color_number}</span>
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </>
+                  )}
                 </div>
 
                 {/* Selected color chip */}
@@ -988,7 +1049,7 @@ export default function App() {
                   />
                   <div className="min-w-0">
                     <p className="font-bold text-brand-dark text-sm truncate">{colorName || 'No color selected'}</p>
-                    <p className="text-xs text-slate-400 font-mono">{colorCode}</p>
+                    <p className="text-xs text-slate-400 font-mono">{colorCode} · {hexCode}</p>
                   </div>
                 </div>
 
