@@ -134,6 +134,58 @@ const downloadImage = (dataUrl: string, filename: string) => {
   document.body.removeChild(a);
 };
 
+const ACCURACY_DISCLAIMER = 'Colors shown are digital approximations and will vary based on your screen, lighting, and surface. Always confirm with a physical paint sample from the manufacturer before purchasing or painting.';
+
+// Downloads the image with the disclaimer baked in as a footer caption
+const downloadWithDisclaimer = (dataUrl: string, filename: string) => {
+  const img = new Image();
+  img.onload = () => {
+    const padding = 16;
+    const fontSize = 13;
+    const lineHeight = fontSize * 1.5;
+    const maxLineWidth = img.width - padding * 2;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+
+    // Word-wrap disclaimer to fit image width
+    const words = ACCURACY_DISCLAIMER.split(' ');
+    const lines: string[] = [];
+    let current = '';
+    for (const word of words) {
+      const test = current ? `${current} ${word}` : word;
+      if (ctx.measureText(test).width > maxLineWidth) {
+        lines.push(current);
+        current = word;
+      } else {
+        current = test;
+      }
+    }
+    if (current) lines.push(current);
+
+    const footerHeight = padding + lines.length * lineHeight + padding;
+    canvas.width = img.width;
+    canvas.height = img.height + footerHeight;
+
+    ctx.drawImage(img, 0, 0);
+
+    // Footer background
+    ctx.fillStyle = '#f1f5f9';
+    ctx.fillRect(0, img.height, canvas.width, footerHeight);
+
+    // Disclaimer text
+    ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    ctx.fillStyle = '#64748b';
+    lines.forEach((line, i) => {
+      ctx.fillText(line, padding, img.height + padding + (i + 1) * lineHeight - 4);
+    });
+
+    downloadImage(canvas.toDataURL('image/jpeg', 0.92), filename);
+  };
+  img.src = dataUrl;
+};
+
 // ─────────────────────────────────────────────────────────────
 // Before/After Comparison Slider
 // ─────────────────────────────────────────────────────────────
@@ -1034,6 +1086,7 @@ export default function App() {
                   </svg>
                   Visualize This Color on My Walls
                 </button>
+                <p className="text-xs text-slate-400 mt-2 leading-relaxed">{ACCURACY_DISCLAIMER}</p>
               </div>
             </div>
           </div>
@@ -1113,8 +1166,9 @@ export default function App() {
                 <div className="rounded-2xl overflow-hidden border-2 border-brand-accent/30 shadow-md bg-slate-100 aspect-video">
                   <ZoomableImage src={resultImage} alt="After" className="w-full h-full object-cover" />
                 </div>
+                <p className="text-xs text-slate-400 leading-relaxed">{ACCURACY_DISCLAIMER}</p>
                 <button
-                  onClick={() => downloadImage(resultImage, `after-${colorName.replace(/\s+/g, '-').toLowerCase()}.jpg`)}
+                  onClick={() => downloadWithDisclaimer(resultImage, `after-${colorName.replace(/\s+/g, '-').toLowerCase()}.jpg`)}
                   className="w-full py-2.5 bg-brand-accent hover:bg-brand-accenthover text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
