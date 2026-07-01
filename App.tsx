@@ -86,26 +86,6 @@ const BRAND_COLORS: Record<PaintBrand, ColorSwatch[]> = {
 };
 
 // ─────────────────────────────────────────────────────────────
-// Color name lookup helpers
-// ─────────────────────────────────────────────────────────────
-
-const normalizeColorName = (value: string) =>
-  value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-
-const getAllColorSwatches = () =>
-  Object.entries(BRAND_COLORS).flatMap(([brand, colors]) =>
-    colors.map(color => ({ ...color, brand }))
-  );
-
-const findColorByName = (name: string) => {
-  const normalizedInput = normalizeColorName(name);
-  if (!normalizedInput) return null;
-  return getAllColorSwatches().find(
-    swatch => normalizeColorName(swatch.name) === normalizedInput
-  ) || null;
-};
-
-// ─────────────────────────────────────────────────────────────
 // Utilities
 // ─────────────────────────────────────────────────────────────
 
@@ -399,9 +379,14 @@ export default function App() {
   // Paint selection state
   const [selectedBrand, setSelectedBrand] = useState<PaintBrand>('Sherwin Williams');
   const [colorName,     setColorName]     = useState('Agreeable Gray');
+  const [colorCode,     setColorCode]     = useState('SW 7029');
   const [hexCode,       setHexCode]       = useState('#B9B5A9');
-  const [originalHex,   setOriginalHex]   = useState('#B9B5A9');
   const [selectedSwatch, setSelectedSwatch] = useState<string | null>('Agreeable Gray');
+
+  // Color search state
+  const [colorSearch,   setColorSearch]   = useState('');
+  const [showDropdown,  setShowDropdown]  = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   // Tweak state
   const [tweakPrompt,     setTweakPrompt]     = useState('');
@@ -482,28 +467,22 @@ export default function App() {
   // ── Color selection ──────────────────────────────────────
   const handleSwatchClick = (swatch: ColorSwatch) => {
     setColorName(swatch.name);
+    setColorCode(swatch.code);
     setHexCode(swatch.hex);
-    setOriginalHex(swatch.hex);
     setSelectedSwatch(swatch.name);
+    setColorSearch('');
+    setShowDropdown(false);
   };
 
   const handleBrandChange = (brand: PaintBrand) => {
     setSelectedBrand(brand);
     const first = BRAND_COLORS[brand][0];
     setColorName(first.name);
+    setColorCode(first.code);
     setHexCode(first.hex);
-    setOriginalHex(first.hex);
     setSelectedSwatch(first.name);
-  };
-
-  const handleHexInput = (raw: string) => {
-    // Allow typing a hex value — ensure it starts with #
-    const val = raw.startsWith('#') ? raw : `#${raw}`;
-    if (/^#[0-9A-Fa-f]{0,6}$/.test(val)) {
-      setHexCode(val);
-      if (val.length === 7) setOriginalHex(val);
-      setSelectedSwatch(null);
-    }
+    setColorSearch('');
+    setShowDropdown(false);
   };
 
   // ── AI generation ────────────────────────────────────────
@@ -598,7 +577,7 @@ export default function App() {
       const isDarker  = /dark(er)?/.test(lower);
       if (isLighter || isDarker) {
         const step = 30;
-        const base = originalHex.length === 7 ? originalHex : hexCode;
+        const base = hexCode;
         const newHex = adjustHex(base, isLighter ? step : -step);
         const direction = isLighter ? 'Lighter' : 'Darker';
         // Strip any previous adjustment suffix from the base name
@@ -1009,56 +988,52 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Custom color input */}
-                <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Or Add Any Custom Color Name or HEX Code</p>
-                  <div className="space-y-3">
-                    <input
-                      type="text"
-                      value={colorName}
-                      onChange={e => {
-                        const value = e.target.value;
-                        setColorName(value);
-                        const matchedSwatch = findColorByName(value);
-                        if (matchedSwatch) {
-                          setHexCode(matchedSwatch.hex);
-                          setOriginalHex(matchedSwatch.hex);
-                          setSelectedSwatch(matchedSwatch.name);
-                          setSelectedBrand(matchedSwatch.brand as PaintBrand);
-                        } else {
-                          setSelectedSwatch(null);
-                          // Restore to last valid hex if current hex is incomplete
-                          setHexCode(prev => prev.length === 7 ? prev : originalHex);
-                        }
-                      }}
-                      placeholder="Color name (e.g. Accessible Beige)"
-                      className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm"
-                    />
-                    <div className="flex items-center gap-3">
-                      <label
-                        htmlFor="color-picker"
-                        className="flex-shrink-0 w-12 h-12 rounded-xl border-2 border-slate-200 cursor-pointer shadow-sm overflow-hidden hover:border-brand-accent transition-colors"
-                        style={{ backgroundColor: hexCode }}
-                        title="Open color picker"
-                      >
-                        <input
-                          id="color-picker"
-                          type="color"
-                          value={hexCode.length === 7 ? hexCode : '#B9B5A9'}
-                          onChange={e => { setHexCode(e.target.value); setSelectedSwatch(null); }}
-                          className="opacity-0 w-full h-full cursor-pointer"
-                        />
-                      </label>
-                      <input
-                        type="text"
-                        value={hexCode}
-                        onChange={e => handleHexInput(e.target.value)}
-                        placeholder="#RRGGBB"
-                        maxLength={7}
-                        className="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-sm text-brand-dark placeholder:text-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm font-mono"
-                      />
-                    </div>
-                  </div>
+                {/* Color search */}
+                <div ref={searchRef} className="relative">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Search any color by name</p>
+                  <input
+                    type="text"
+                    value={colorSearch}
+                    onChange={e => {
+                      setColorSearch(e.target.value);
+                      setShowDropdown(true);
+                    }}
+                    onFocus={() => setShowDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+                    placeholder={`Search ${selectedBrand} colors…`}
+                    className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-brand-dark placeholder:text-slate-400 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm"
+                  />
+                  {showDropdown && (() => {
+                    const q = colorSearch.trim().toLowerCase();
+                    const results = q
+                      ? BRAND_COLORS[selectedBrand].filter(c =>
+                          c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
+                        )
+                      : BRAND_COLORS[selectedBrand];
+                    if (!results.length) return (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg py-2 px-4 text-sm text-slate-400">
+                        No matches found
+                      </div>
+                    );
+                    return (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg overflow-y-auto" style={{ maxHeight: '272px' }}>
+                        {results.map(c => (
+                          <button
+                            key={c.code}
+                            onMouseDown={() => handleSwatchClick(c)}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors text-left ${selectedSwatch === c.name ? 'bg-brand-light' : ''}`}
+                          >
+                            <span
+                              className="flex-shrink-0 w-6 h-6 rounded-md border border-black/10 shadow-sm"
+                              style={{ backgroundColor: c.hex }}
+                            />
+                            <span className="flex-1 font-medium text-brand-dark truncate">{c.name}</span>
+                            <span className="flex-shrink-0 text-xs text-slate-400 font-mono">{c.code}</span>
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Selected color chip */}
@@ -1070,7 +1045,7 @@ export default function App() {
                   <div className="min-w-0">
                     <p className="font-bold text-brand-dark text-sm truncate">{colorName || 'No color selected'}</p>
                     <p className="text-xs text-slate-500 truncate">{selectedBrand}</p>
-                    <p className="text-xs text-slate-400 font-mono">{hexCode}</p>
+                    <p className="text-xs text-slate-400 font-mono">{colorCode}</p>
                   </div>
                 </div>
 
