@@ -41,10 +41,8 @@ declare global {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Paint brand data
+// Paint color data — Sherwin-Williams
 // ─────────────────────────────────────────────────────────────
-const PAINT_BRANDS = ['Sherwin Williams', 'Benjamin Moore', 'Behr'] as const;
-type PaintBrand = (typeof PAINT_BRANDS)[number];
 
 interface ColorSwatch {
   name: string;
@@ -52,38 +50,16 @@ interface ColorSwatch {
   code: string;
 }
 
-const BRAND_COLORS: Record<PaintBrand, ColorSwatch[]> = {
-  'Sherwin Williams': [
-    { name: 'Agreeable Gray',   hex: '#B9B5A9', code: 'SW 7029' },
-    { name: 'Accessible Beige', hex: '#D4C8B0', code: 'SW 7036' },
-    { name: 'Alabaster',        hex: '#F2EFE4', code: 'SW 7008' },
-    { name: 'Repose Gray',      hex: '#C0BCBB', code: 'SW 7015' },
-    { name: 'Naval',            hex: '#4B5D72', code: 'SW 6244' },
-    { name: 'Evergreen Fog',    hex: '#8F9E8E', code: 'SW 9130' },
-    { name: 'Cavern Clay',      hex: '#BC6B4A', code: 'SW 7701' },
-    { name: 'Mindful Gray',     hex: '#B7B3AE', code: 'SW 7016' },
-  ],
-  'Benjamin Moore': [
-    { name: 'White Dove',       hex: '#F3F1E7', code: 'OC-17'   },
-    { name: 'Pale Oak',         hex: '#D9CDB9', code: 'OC-20'   },
-    { name: 'Revere Pewter',    hex: '#C3BAA5', code: 'HC-172'  },
-    { name: 'Chantilly Lace',   hex: '#F5F3EC', code: 'OC-65'   },
-    { name: 'Simply White',     hex: '#F6F3E8', code: 'OC-117'  },
-    { name: 'Blue Note',        hex: '#5B7B9C', code: '2129-30' },
-    { name: 'Hale Navy',        hex: '#4A5A6B', code: 'HC-154'  },
-    { name: 'Newburyport Blue', hex: '#5B7A8A', code: 'HC-155'  },
-  ],
-  'Behr': [
-    { name: 'Swiss Coffee',     hex: '#F0EAD6', code: 'PPU5-12'  },
-    { name: 'Polar Bear',       hex: '#F3F1EA', code: 'PPU18-06' },
-    { name: 'Silver Drop',      hex: '#C8C5BB', code: 'N520-2'   },
-    { name: 'Gentle Dove',      hex: '#D5D0CA', code: 'GR-W15'   },
-    { name: 'Blueprint',        hex: '#5B7CA0', code: 'S510-5'   },
-    { name: 'Mossy Hillside',   hex: '#8FA07A', code: 'S390-5'   },
-    { name: 'Canyon Dusk',      hex: '#C4906B', code: 'S200-5'   },
-    { name: 'Dark Pewter',      hex: '#8C8880', code: 'N520-5'   },
-  ],
-};
+const SW_COLORS: ColorSwatch[] = [
+  { name: 'Agreeable Gray',   hex: '#B9B5A9', code: 'SW 7029' },
+  { name: 'Accessible Beige', hex: '#D4C8B0', code: 'SW 7036' },
+  { name: 'Alabaster',        hex: '#F2EFE4', code: 'SW 7008' },
+  { name: 'Repose Gray',      hex: '#C0BCBB', code: 'SW 7015' },
+  { name: 'Naval',            hex: '#4B5D72', code: 'SW 6244' },
+  { name: 'Evergreen Fog',    hex: '#8F9E8E', code: 'SW 9130' },
+  { name: 'Cavern Clay',      hex: '#BC6B4A', code: 'SW 7701' },
+  { name: 'Mindful Gray',     hex: '#B7B3AE', code: 'SW 7016' },
+];
 
 // ─────────────────────────────────────────────────────────────
 // Utilities
@@ -377,7 +353,6 @@ export default function App() {
   const resultPhotosInputRef = useRef<HTMLInputElement>(null);
 
   // Paint selection state
-  const [selectedBrand, setSelectedBrand] = useState<PaintBrand>('Sherwin Williams');
   const [colorName,     setColorName]     = useState('Agreeable Gray');
   const [colorCode,     setColorCode]     = useState('SW 7029');
   const [hexCode,       setHexCode]       = useState('#B9B5A9');
@@ -474,17 +449,6 @@ export default function App() {
     setShowDropdown(false);
   };
 
-  const handleBrandChange = (brand: PaintBrand) => {
-    setSelectedBrand(brand);
-    const first = BRAND_COLORS[brand][0];
-    setColorName(first.name);
-    setColorCode(first.code);
-    setHexCode(first.hex);
-    setSelectedSwatch(first.name);
-    setColorSearch('');
-    setShowDropdown(false);
-  };
-
   // ── AI generation ────────────────────────────────────────
   const handleGenerate = useCallback(async () => {
     if (!originalImage || !colorName || !hexCode) return;
@@ -493,7 +457,7 @@ export default function App() {
     try {
       const base64 = originalImage.split(',')[1];
       const painted = await applyPaintColor(
-        base64, originalMimeType, selectedBrand, colorName, hexCode
+        base64, originalMimeType, 'Sherwin Williams', colorName, hexCode
       );
       setResultImage(painted);
       setStep('result');
@@ -503,7 +467,7 @@ export default function App() {
       setError(err.message ?? 'Something went wrong. Please try again.');
       setStep('configure');
     }
-  }, [originalImage, originalMimeType, selectedBrand, colorName, hexCode]);
+  }, [originalImage, originalMimeType, colorName, hexCode]);
 
   // Helper: extract base64 + mime from the current result data URL
   const splitDataUrl = (dataUrl: string): { mime: string; base64: string } | null => {
@@ -610,7 +574,7 @@ export default function App() {
       from_name:   formName,
       from_email:  formEmail,
       phone:       formPhone || 'Not provided',
-      paint_brand: selectedBrand,
+      paint_brand: 'Sherwin Williams',
       color_name:  colorName,
       hex_code:    hexCode,
       notes:       formNotes || 'None',
@@ -643,7 +607,7 @@ export default function App() {
           `Phone: ${formPhone || 'Not provided'}`,
           ``,
           `Paint Color Selection:`,
-          `  Brand: ${selectedBrand}`,
+          `  Brand: Sherwin Williams`,
           `  Color: ${colorName}`,
           `  Hex:   ${hexCode}`,
           ``,
@@ -652,7 +616,7 @@ export default function App() {
           `— Sent via PaintStage Pro`,
         ].join('\n');
 
-        const subject = encodeURIComponent(`Paint Estimate Request — ${colorName} (${selectedBrand})`);
+        const subject = encodeURIComponent(`Paint Estimate Request — ${colorName} (Sherwin Williams)`);
         window.location.href = `mailto:${CONTRACTOR_EMAIL}?subject=${subject}&body=${encodeURIComponent(body)}`;
         setSubmitStatus('success');
       }
@@ -665,7 +629,7 @@ export default function App() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [formName, formEmail, formPhone, formNotes, selectedBrand, colorName, hexCode, originalImage, resultImage]);
+  }, [formName, formEmail, formPhone, formNotes, colorName, hexCode, originalImage, resultImage]);
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -938,36 +902,16 @@ export default function App() {
               <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 flex flex-col gap-6">
                 <div>
                   <h2 className="text-xl font-black text-brand-dark">Pick Your Paint Color</h2>
-                  <p className="text-sm text-slate-400 mt-1">Choose a brand, select a popular color, or enter a custom hex code.</p>
-                </div>
-
-                {/* Brand selector */}
-                <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Paint Brand</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {PAINT_BRANDS.map(brand => (
-                      <button
-                        key={brand}
-                        onClick={() => handleBrandChange(brand)}
-                        className={`py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold border-2 transition-all leading-tight ${
-                          selectedBrand === brand
-                            ? 'border-brand-accent bg-brand-light text-brand-accent'
-                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                        }`}
-                      >
-                        {brand === 'Sherwin Williams' ? 'Sherwin-Williams' : brand}
-                      </button>
-                    ))}
-                  </div>
+                  <p className="text-sm text-slate-400 mt-1">Select a popular color or search by name or code.</p>
                 </div>
 
                 {/* Popular color swatches */}
                 <div>
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
-                    Popular {selectedBrand} Colors
+                    Popular Colors
                   </p>
                   <div className="grid grid-cols-4 gap-2">
-                    {BRAND_COLORS[selectedBrand].map(swatch => (
+                    {SW_COLORS.map(swatch => (
                       <button
                         key={swatch.name}
                         onClick={() => handleSwatchClick(swatch)}
@@ -1000,16 +944,16 @@ export default function App() {
                     }}
                     onFocus={() => setShowDropdown(true)}
                     onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
-                    placeholder={`Search ${selectedBrand} colors…`}
+                    placeholder="Search Sherwin-Williams colors…"
                     className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-brand-dark placeholder:text-slate-400 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none shadow-sm"
                   />
                   {showDropdown && (() => {
                     const q = colorSearch.trim().toLowerCase();
                     const results = q
-                      ? BRAND_COLORS[selectedBrand].filter(c =>
+                      ? SW_COLORS.filter(c =>
                           c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
                         )
-                      : BRAND_COLORS[selectedBrand];
+                      : SW_COLORS;
                     if (!results.length) return (
                       <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg py-2 px-4 text-sm text-slate-400">
                         No matches found
@@ -1044,7 +988,6 @@ export default function App() {
                   />
                   <div className="min-w-0">
                     <p className="font-bold text-brand-dark text-sm truncate">{colorName || 'No color selected'}</p>
-                    <p className="text-xs text-slate-500 truncate">{selectedBrand}</p>
                     <p className="text-xs text-slate-400 font-mono">{colorCode}</p>
                   </div>
                 </div>
@@ -1082,7 +1025,7 @@ export default function App() {
                 />
                 <div className="text-left">
                   <p className="text-[13px] font-semibold text-[#1e2d4a] leading-tight">{colorName}</p>
-                  <p className="text-[11px] text-slate-400 font-medium tracking-wide uppercase">{selectedBrand} · {hexCode}</p>
+                  <p className="text-[11px] text-slate-400 font-medium tracking-wide uppercase">Sherwin-Williams · {colorCode}</p>
                 </div>
               </div>
 
@@ -1112,7 +1055,7 @@ export default function App() {
                 Your Room in{' '}
                 <span className="text-brand-accent">{colorName}</span>
               </h2>
-              <p className="text-slate-500 mt-1">{selectedBrand} · {hexCode}</p>
+              <p className="text-slate-500 mt-1">Sherwin-Williams · {colorCode}</p>
             </div>
 
             {/* Comparison slider */}
@@ -1559,7 +1502,7 @@ export default function App() {
                     <div className="min-w-0">
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Selected Color</p>
                       <p className="font-bold text-brand-dark text-sm truncate">{colorName}</p>
-                      <p className="text-xs text-slate-500">{selectedBrand} · {hexCode}</p>
+                      <p className="text-xs text-slate-500">Sherwin-Williams · {colorCode}</p>
                     </div>
                   </div>
 
