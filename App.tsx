@@ -396,6 +396,14 @@ export default function App() {
       .order('color_number')
       .range(0, 1999)
       .then(({ data, error }) => {
+        console.log('[PaintStage] Supabase fetch error:', error ?? 'none');
+        console.log('[PaintStage] Rows returned:', data?.length ?? 0);
+        console.log('[PaintStage] First color_number:', data?.[0]?.color_number ?? 'n/a');
+        console.log('[PaintStage] Last color_number:', data?.[data.length - 1]?.color_number ?? 'n/a');
+        if (data) {
+          const urbaneMatches = data.filter(c => c.color_name.toLowerCase().includes('urbane'));
+          console.log('[PaintStage] Rows containing "urbane" in color_name:', urbaneMatches.length, urbaneMatches.map(c => c.color_name));
+        }
         if (error) {
           console.error('Failed to load paint colors:', error);
           setColorsError('Could not load color data. Check your Supabase connection.');
