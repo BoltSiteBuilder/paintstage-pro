@@ -52,13 +52,19 @@ interface ColorSwatch {
 }
 
 interface PaintColor {
+  id: number;
+  brand: string;
   color_number: string;
   color_name: string;
-  hex: string;
+  formula_code: string | null;
+  locator_number: string | null;
   rgb_r: number;
   rgb_g: number;
   rgb_b: number;
-  collection: string;
+  hex: string;
+  collection: string | null;
+  color_family: string | null;
+  search_text: string | null;
 }
 
 const SW_COLORS: ColorSwatch[] = [
@@ -386,7 +392,7 @@ export default function App() {
   useEffect(() => {
     supabase
       .from('paint_colors')
-      .select('color_number, color_name, hex, rgb_r, rgb_g, rgb_b, collection')
+      .select('id, brand, color_number, color_name, formula_code, locator_number, rgb_r, rgb_g, rgb_b, hex, collection, color_family, search_text')
       .order('color_number')
       .then(({ data, error }) => {
         if (error) {
