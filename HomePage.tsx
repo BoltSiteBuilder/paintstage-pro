@@ -120,7 +120,7 @@ const HomePage: React.FC<HomePageProps> = ({ onStart }) => {
                 <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                3,000+ real colors
+                1,700+ real colors
               </div>
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
