@@ -150,7 +150,7 @@ const HomePage: React.FC<HomePageProps> = ({ onStart }) => {
       <section className="bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
-            { value: '3,000+', label: 'Real paint colors' },
+            { value: '1,700+', label: 'Real paint colors' },
             { value: 'Seconds', label: 'To see your result' },
             { value: '100%', label: 'Free to try' },
             { value: '0', label: 'Apps to install' },
