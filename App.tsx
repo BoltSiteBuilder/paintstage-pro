@@ -6,6 +6,7 @@ import {
   tweakPaintedImage,
 } from './services/geminiService';
 import { supabase } from './services/supabaseClient';
+import HomePage from './HomePage';
 
 // ============================================================
 // CONFIGURATION — Customize these for Matt's business
@@ -352,8 +353,12 @@ const ZoomableImage: React.FC<{ src: string; alt: string; className?: string }> 
 // Main App
 // ─────────────────────────────────────────────────────────────
 type AppStep = 'upload' | 'configure' | 'loading' | 'result';
+type AppView = 'home' | 'visualizer';
 
 export default function App() {
+  // View state — home page vs visualizer tool
+  const [view, setView] = useState<AppView>('home');
+
   // Image state
   const [step, setStep] = useState<AppStep>('upload');
   const [originalImage,   setOriginalImage]   = useState<string | null>(null);
@@ -713,14 +718,29 @@ export default function App() {
   // ────────────────────────────────────────────────────────
   // RENDER
   // ────────────────────────────────────────────────────────
+  const goToHome = () => {
+    setView('home');
+    window.scrollTo(0, 0);
+  };
+
+  const goToVisualizer = () => {
+    setView('visualizer');
+    setStep('upload');
+    window.scrollTo(0, 0);
+  };
+
+  if (view === 'home') {
+    return <HomePage onStart={goToVisualizer} />;
+  }
+
   return (
     <div className="min-h-screen bg-page-bg text-brand-dark font-sans flex flex-col">
 
       {/* ── Header ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-24 flex items-center justify-between">
-          {/* Logo */}
-          <button onClick={resetToUpload} className="group">
+          {/* Logo + back to home */}
+          <button onClick={goToHome} className="group flex items-center gap-3">
             <img
               src="/ChatGPT_Image_May_14,_2026,_03_45_00_PM.png"
               alt="PaintStage Pro"
@@ -730,7 +750,13 @@ export default function App() {
 
           {/* Right side */}
           <div className="flex items-center gap-3">
-{step === 'result' && (
+            <button
+              onClick={goToHome}
+              className="px-4 py-2 text-slate-500 hover:text-brand-dark hover:bg-slate-100 rounded-lg font-semibold text-sm transition-all"
+            >
+              ← Home
+            </button>
+            {step === 'result' && (
               <button
                 onClick={scrollToForm}
                 className="px-4 py-2 bg-brand-accent hover:bg-brand-accenthover text-white rounded-lg font-bold text-sm shadow-sm transition-all"
@@ -1678,11 +1704,13 @@ export default function App() {
 
       {/* ── Footer ──────────────────────────────────────────── */}
       <footer className="mt-16 py-10 border-t border-slate-200 text-center">
-        <img
-          src="/ChatGPT_Image_May_14,_2026,_03_45_00_PM.png"
-          alt="PaintStage Pro"
-          className="h-14 w-auto object-contain mx-auto mb-4 opacity-80"
-        />
+        <button onClick={goToHome} className="block mx-auto mb-4">
+          <img
+            src="/ChatGPT_Image_May_14,_2026,_03_45_00_PM.png"
+            alt="PaintStage Pro"
+            className="h-14 w-auto object-contain mx-auto opacity-80 hover:opacity-100 transition-opacity"
+          />
+        </button>
         <p className="text-slate-400 text-xs">
           AI color visualizations are approximate previews. Actual results may vary based on lighting, surface texture, and paint sheen.
         </p>
