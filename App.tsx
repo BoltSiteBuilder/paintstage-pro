@@ -7,6 +7,9 @@ import {
 } from './services/geminiService';
 import { supabase } from './services/supabaseClient';
 import HomePage from './HomePage';
+import PricingPage from './PricingPage';
+import { useStageMeter } from './hooks/useStageMeter';
+import { nextPlanUp, HARD_CAP_STAGES } from './config/plans';
 
 // ============================================================
 // CONFIGURATION — Customize these for Matt's business
@@ -353,11 +356,15 @@ const ZoomableImage: React.FC<{ src: string; alt: string; className?: string }> 
 // Main App
 // ─────────────────────────────────────────────────────────────
 type AppStep = 'upload' | 'configure' | 'loading' | 'result';
-type AppView = 'home' | 'visualizer';
+type AppView = 'home' | 'visualizer' | 'pricing';
 
 export default function App() {
   // View state — home page vs visualizer tool
   const [view, setView] = useState<AppView>('home');
+
+  // Plan limits. Fails open: when metering is not deployed the studio is unmetered.
+  const meter = useStageMeter();
+  const { blocked: stagesExhausted, countStage } = meter;
 
   // Image state
   const [step, setStep] = useState<AppStep>('upload');
@@ -520,6 +527,11 @@ export default function App() {
   // ── AI generation ────────────────────────────────────────
   const handleGenerate = useCallback(async () => {
     if (!originalImage || !colorName || !hexCode) return;
+    if (stagesExhausted) {
+      setStep('configure');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     setStep('loading');
     setError(null);
     try {
@@ -529,13 +541,15 @@ export default function App() {
       );
       setResultImage(painted);
       setStep('result');
+      // One stage = one successful render.
+      void countStage();
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     } catch (err: any) {
       console.error('PaintStage error:', err);
       setError(err.message ?? 'Something went wrong. Please try again.');
       setStep('configure');
     }
-  }, [originalImage, originalMimeType, colorName, hexCode]);
+  }, [originalImage, originalMimeType, colorName, hexCode, stagesExhausted, countStage]);
 
   // Helper: extract base64 + mime from the current result data URL
   const splitDataUrl = (dataUrl: string): { mime: string; base64: string } | null => {
@@ -729,9 +743,20 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
+  const goToPricing = () => {
+    setView('pricing');
+    window.scrollTo(0, 0);
+  };
+
   if (view === 'home') {
-    return <HomePage onStart={goToVisualizer} />;
+    return <HomePage onStart={goToVisualizer} onPricing={goToPricing} />;
   }
+
+  if (view === 'pricing') {
+    return <PricingPage onStart={goToVisualizer} onHome={goToHome} status={meter.status} />;
+  }
+
+  const upgradeTarget = nextPlanUp(meter.status?.planId);
 
   return (
     <div className="min-h-screen bg-page-bg text-brand-dark font-sans flex flex-col">
@@ -750,6 +775,20 @@ export default function App() {
 
           {/* Right side */}
           <div className="flex items-center gap-3">
+            {meter.status?.configured && (
+              <button
+                onClick={goToPricing}
+                title="Stages remaining this billing period"
+                className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg font-bold text-xs transition-all ${
+                  stagesExhausted
+                    ? 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                    : 'text-slate-500 hover:text-brand-dark hover:bg-slate-100'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${stagesExhausted ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                {meter.status.stagesRemaining} of {meter.status.stagesIncluded} stages left
+              </button>
+            )}
             <button
               onClick={goToHome}
               className="px-4 py-2 text-slate-500 hover:text-brand-dark hover:bg-slate-100 rounded-lg font-semibold text-sm transition-all"
@@ -767,6 +806,32 @@ export default function App() {
           </div>
         </div>
       </header>
+
+      {/* ── Plan limit reached ──────────────────────────────── */}
+      {stagesExhausted && (
+        <div className="bg-amber-50 border-b border-amber-200">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex-1">
+              <p className="font-bold text-amber-900 text-sm">
+                {upgradeTarget
+                  ? `You've used all ${meter.status?.stagesIncluded} stages in this billing period.`
+                  : `You've hit the ${HARD_CAP_STAGES}-stage cap for this billing period.`}
+              </p>
+              <p className="text-amber-800 text-xs mt-0.5">
+                {upgradeTarget
+                  ? `Move up to ${upgradeTarget.name} for ${upgradeTarget.tagline.toLowerCase()} at $${upgradeTarget.priceMonthly}/month. Everything you've already staged stays available.`
+                  : `We stop here rather than bill you for overages. Get in touch and we'll sort out a volume arrangement.`}
+              </p>
+            </div>
+            <button
+              onClick={goToPricing}
+              className="flex-shrink-0 px-5 py-2.5 bg-brand-accent hover:bg-brand-accenthover text-white rounded-xl font-bold text-sm shadow-sm transition-all"
+            >
+              {upgradeTarget ? `Upgrade to ${upgradeTarget.name}` : 'Talk to us about volume'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Main content ────────────────────────────────────── */}
       <main className="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -1098,15 +1163,15 @@ export default function App() {
 
                 {/* Generate CTA */}
                 <button
-                  onClick={handleGenerate}
-                  disabled={!colorName.trim() || hexCode.length < 4}
+                  onClick={stagesExhausted ? goToPricing : handleGenerate}
+                  disabled={!stagesExhausted && (!colorName.trim() || hexCode.length < 4)}
                   className="w-full py-4 bg-brand-accent hover:bg-brand-accenthover disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-2xl font-black text-base shadow-md transition-all flex items-center justify-center gap-3 mt-2"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                       d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-4a2 2 0 00-2 2v4a2 2 0 002 2zm0-2h12" />
                   </svg>
-                  Visualize This Color on My Walls
+                  {stagesExhausted ? 'Out of stages — see plans' : 'Visualize This Color on My Walls'}
                 </button>
                 <p className="text-xs text-slate-400 mt-2 leading-relaxed">{ACCURACY_DISCLAIMER}</p>
               </div>
