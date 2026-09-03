@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { MarketingHeader, MarketingFooter } from './components/MarketingChrome';
+import BeforeAfterSlider from './components/BeforeAfterSlider';
 import { HARD_CAP_STAGES, PLAN_LIST, TRIAL_STAGES } from './config/plans';
 
+// Real matched pairs: same camera position, one shot unpainted and one staged in
+// PaintStage Pro. Before/after images in a pair share identical dimensions so the
+// wipe stays registered at every handle position.
 const HERO_BEFORE = '/hero-before-white-walls.jpg';
 const HERO_AFTER = '/hero-after-slate-blue.jpg';
-
-// No in-house exterior shot yet — swap this for real job photography when there is one.
-const EXTERIOR_IMG =
-  'https://images.pexels.com/photos/6422929/pexels-photo-6422929.jpeg?auto=compress&cs=tinysrgb&h=650&w=940';
+const BEDROOM_BEFORE = '/stage-bedroom-before.jpg';
+const BEDROOM_AFTER = '/stage-bedroom-after.jpg';
+const EXTERIOR_BEFORE = '/stage-exterior-before.jpg';
+const EXTERIOR_AFTER = '/stage-exterior-after.jpg';
 
 const VALUE_PROPS = [
   {
@@ -116,8 +120,8 @@ const HomePage: React.FC<HomePageProps> = ({ onStart, onPricing }) => {
           }}
         />
 
-        <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-12">
-          <div className="lg:col-span-7">
+        <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-12">
+          <div className="lg:col-span-6">
             <div className="animate-fade-in mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
               <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
               Built for painting contractors
@@ -169,22 +173,17 @@ const HomePage: React.FC<HomePageProps> = ({ onStart, onPricing }) => {
             </div>
           </div>
 
-          <div className="lg:col-span-5">
-            <div className="mx-auto w-full max-w-[540px]">
-              <div className="relative overflow-hidden rounded-3xl bg-slate-200 shadow-2xl ring-1 ring-black/5">
-                <img
-                  src={HERO_BEFORE}
-                  alt="Professional interior ready for color staging"
-                  className="aspect-[4/3] w-full object-cover"
-                />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-brand-dark/70 to-transparent p-6">
-                  <p className="text-sm font-semibold text-white">
-                    Real contractor job, ready to stage in any color
-                  </p>
-                </div>
-              </div>
+          <div className="lg:col-span-6">
+            <div className="w-full">
+              <BeforeAfterSlider
+                before={HERO_BEFORE}
+                after={HERO_AFTER}
+                beforeAlt="Living room with white walls, before staging"
+                afterAlt="The same living room staged with a slate-blue accent wall"
+                aspectClassName="aspect-[3/2]"
+              />
               <p className="mt-4 text-center text-sm text-slate-400">
-                Stage any room in real fan-deck colors, in about a minute.
+                Drag the handle — same room, same photo, staged in about a minute.
               </p>
             </div>
           </div>
@@ -317,18 +316,16 @@ const HomePage: React.FC<HomePageProps> = ({ onStart, onPricing }) => {
           </div>
 
           <div className="order-1 lg:order-2">
-            <div className="relative overflow-hidden rounded-3xl shadow-xl">
-              <img
-                src={HERO_AFTER}
-                alt="Living room staged with a slate-blue accent wall"
-                className="aspect-[4/3] w-full object-cover"
-              />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-brand-dark/70 to-transparent p-5">
-                <p className="text-sm font-semibold text-white">
-                  Slate-blue accent wall, staged from the homeowner's own photo
-                </p>
-              </div>
-            </div>
+            <BeforeAfterSlider
+              before={BEDROOM_BEFORE}
+              after={BEDROOM_AFTER}
+              beforeAlt="Bedroom with white walls, before staging"
+              afterAlt="The same bedroom staged in a soft sage green"
+              aspectClassName="aspect-[3/2]"
+            />
+            <p className="mt-4 text-sm text-slate-500">
+              Bedroom staged in a soft sage green, from the homeowner's own photo.
+            </p>
           </div>
         </div>
       </section>
@@ -337,14 +334,17 @@ const HomePage: React.FC<HomePageProps> = ({ onStart, onPricing }) => {
       <section className="border-y border-slate-200 bg-white py-20 sm:py-28">
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-2">
           <div>
-            <div className="group relative overflow-hidden rounded-3xl shadow-xl">
-              <img
-                src={EXTERIOR_IMG}
-                alt="Freshly painted home exterior"
-                className="aspect-[4/3] w-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/40 to-transparent" />
-            </div>
+            <BeforeAfterSlider
+              before={EXTERIOR_BEFORE}
+              after={EXTERIOR_AFTER}
+              beforeAlt="Two-story home with dark charcoal siding, before staging"
+              afterAlt="The same home staged with lighter gray siding"
+              aspectClassName="aspect-[37/27]"
+            />
+            <p className="mt-4 text-sm text-slate-500">
+              The whole elevation restaged from charcoal to a lighter gray. Roof, trim and landscaping
+              stay untouched.
+            </p>
           </div>
           <div>
             <p className="mb-3 text-sm font-bold uppercase tracking-widest text-brand-accent">Exteriors</p>
