@@ -1,0 +1,17 @@
+{
+  "name": "PaintStage Pro",
+  "install": "npm ci",
+  "terminals": [
+    {
+      "name": "dev",
+      "command": "npm run dev",
+      "description": "Vite dev server for the PaintStage Pro frontend, served at http://localhost:3000. Reads VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY from the environment."
+    }
+  ],
+  "ports": [
+    {
+      "name": "web",
+      "port": 3000
+    }
+  ]
+}
