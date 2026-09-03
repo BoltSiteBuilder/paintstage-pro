@@ -26,13 +26,12 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
   afterAlt,
   beforeLabel = 'Before',
   afterLabel = 'After',
-  aspectClassName = 'aspect-[4/5]',
+  aspectClassName = 'aspect-[3/4]',
   className = '',
 }) => {
   const frameRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState(64);
   const [dragging, setDragging] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
 
   // Settle to the middle once mounted so the control reads as draggable.
   useEffect(() => {
@@ -51,7 +50,6 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     event.currentTarget.setPointerCapture(event.pointerId);
     setDragging(true);
-    setHasInteracted(true);
     positionFromClientX(event.clientX);
   };
 
@@ -76,7 +74,6 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
     if (event.key === 'End') next = 100;
     if (next === null) return;
     event.preventDefault();
-    setHasInteracted(true);
     setPosition(clamp(next));
   };
 
@@ -87,7 +84,7 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
-      className={`relative ${aspectClassName} w-full overflow-hidden rounded-3xl bg-slate-200 shadow-2xl ring-1 ring-black/5 select-none touch-none cursor-ew-resize ${className}`}
+      className={`relative ${aspectClassName} w-full overflow-hidden rounded-3xl bg-slate-200 shadow-2xl ring-1 ring-black/5 select-none touch-pan-y cursor-ew-resize ${className}`}
     >
       <img
         src={after}
@@ -145,12 +142,6 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
           <path d="M9 6l-5 6 5 6M15 6l5 6-5 6" />
         </svg>
       </div>
-
-      {!hasInteracted && (
-        <span className="pointer-events-none absolute inset-x-0 bottom-4 text-center text-xs font-semibold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]">
-          Drag to compare
-        </span>
-      )}
     </div>
   );
 };

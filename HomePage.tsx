@@ -177,7 +177,7 @@ const HomePage: React.FC<HomePageProps> = ({ onStart, onPricing }) => {
                 after={HERO_AFTER}
                 beforeAlt="Open-plan living room with white walls before repainting"
                 afterAlt="The same home with a slate-blue accent wall after repainting"
-                aspectClassName="aspect-[4/5]"
+                aspectClassName="aspect-[3/4]"
               />
               <p className="mt-4 text-center text-sm text-slate-400">
                 Real job, staged in PaintStage Pro. Drag the handle.
