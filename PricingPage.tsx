@@ -13,7 +13,7 @@ interface PricingPageProps {
 const PRICING_FAQS = [
   {
     q: 'What exactly counts as a stage?',
-    a: 'One stage is one successful paint render. If a render fails you are not charged for it. Refining a photo you already staged — repainting the trim, changing the door colour, asking for a lighter shade — does not spend another stage.',
+    a: 'One stage is one successful paint render. If a render fails you are not charged for it. Refining a photo you already staged — repainting the trim, changing the door color, asking for a lighter shade — does not spend another stage.',
   },
   {
     q: 'What happens when I run out?',
@@ -137,7 +137,7 @@ const PricingPage: React.FC<PricingPageProps> = ({ onStart, onHome, status }) =>
         <section className="mx-auto max-w-3xl px-4 pb-4 pt-16 text-center sm:px-6 sm:pt-20">
           <p className="mb-3 text-sm font-bold uppercase tracking-widest text-brand-accent">Pricing</p>
           <h1 className="text-4xl font-black leading-tight text-brand-dark sm:text-5xl">
-            Priced per month, not per argument about paint colours
+            Priced per month, not per argument about paint colors
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-500">
             One stage is one successful paint render. Pick the band that matches how many estimates you
@@ -222,7 +222,7 @@ const PricingPage: React.FC<PricingPageProps> = ({ onStart, onHome, status }) =>
                 <p className="mb-3 text-sm font-bold uppercase tracking-wider text-emerald-600">Uses a stage</p>
                 <ul className="space-y-2 text-sm text-slate-600">
                   <li>Painting the walls in a photo you uploaded</li>
-                  <li>Staging the same room again in a different colour</li>
+                  <li>Staging the same room again in a different color</li>
                   <li>Staging a second photo of the same job</li>
                 </ul>
               </div>

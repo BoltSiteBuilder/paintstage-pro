@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import BeforeAfterSlider from './components/BeforeAfterSlider';
 import { MarketingHeader, MarketingFooter } from './components/MarketingChrome';
 import { HARD_CAP_STAGES, PLAN_LIST, TRIAL_STAGES } from './config/plans';
 
@@ -27,7 +26,7 @@ const VALUE_PROPS = [
   },
   {
     title: 'Cut the callback repaints',
-    body: 'A colour signed off from a photo of their own room, in their own light, is a colour they stop second-guessing once two coats are on the wall.',
+    body: 'A color signed off from a photo of their own room, in their own light, is a color they stop second-guessing once two coats are on the wall.',
     icon: (
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
     ),
@@ -47,8 +46,8 @@ const STEPS = [
     body: 'On site, on the estimator\'s phone. Interior or exterior, one photo or a dozen — no lighting kit, no measuring.',
   },
   {
-    title: 'Pick the real colour',
-    body: 'Search 1,700+ Sherwin-Williams, Benjamin Moore and Behr colours by name or code, or drop in any hex the client hands you.',
+    title: 'Pick the real color',
+    body: 'Search 1,700+ Sherwin-Williams, Benjamin Moore and Behr colors by name or code, or drop in any hex the client hands you.',
   },
   {
     title: 'Stage it',
@@ -70,8 +69,8 @@ const FAQS = [
     a: 'One stage is one successful paint render. Trim passes, door passes and lighter/darker refinements on a photo you already staged are free, and a failed render never counts against you.',
   },
   {
-    q: 'How accurate are the colours?',
-    a: 'They are photo-real previews, not colour-matched proofs. Screens, lighting, sheen and substrate all shift the result, so every download carries a disclaimer saying so. Keep bringing physical samples to the sign-off — this gets you to the shortlist far faster.',
+    q: 'How accurate are the colors?',
+    a: 'They are photo-real previews, not color-matched proofs. Screens, lighting, sheen and substrate all shift the result, so every download carries a disclaimer saying so. Keep bringing physical samples to the sign-off — this gets you to the shortlist far faster.',
   },
   {
     q: 'Does it work on exteriors?',
@@ -88,7 +87,7 @@ const FAQS = [
 ];
 
 const STATS = [
-  { value: '1,700+', label: 'Real fan-deck colours' },
+  { value: '1,700+', label: 'Real fan-deck colors' },
   { value: '~1 min', label: 'From photo to staged room' },
   { value: '$29/mo', label: 'To get started' },
   { value: 'No', label: 'Overage bills, ever' },
@@ -125,14 +124,14 @@ const HomePage: React.FC<HomePageProps> = ({ onStart, onPricing }) => {
             </div>
 
             <h1 className="mb-6 text-4xl font-black leading-[1.08] text-white sm:text-5xl md:text-6xl">
-              Close the colour conversation
+              Close the color conversation
               <br />
               <span className="text-brand-accent">on the first visit</span>
             </h1>
 
             <p className="mb-8 max-w-xl text-lg leading-relaxed text-slate-300 sm:text-xl">
               PaintStage Pro turns a phone photo of your client's room into a photo-real repaint in real
-              fan-deck colours — while you are still standing in it. Send it with the estimate instead of
+              fan-deck colors — while you are still standing in it. Send it with the estimate instead of
               hoping they can picture it.
             </p>
 
@@ -159,7 +158,7 @@ const HomePage: React.FC<HomePageProps> = ({ onStart, onPricing }) => {
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/80">
-              {['1,700+ real colours', 'Interior & exterior', 'Runs on your phone'].map(item => (
+              {['1,700+ real colors', 'Interior & exterior', 'Runs on your phone'].map(item => (
                 <div key={item} className="flex items-center gap-2">
                   <svg className="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -171,16 +170,21 @@ const HomePage: React.FC<HomePageProps> = ({ onStart, onPricing }) => {
           </div>
 
           <div className="lg:col-span-5">
-            <div className="mx-auto w-full max-w-[420px]">
-              <BeforeAfterSlider
-                before={HERO_BEFORE}
-                after={HERO_AFTER}
-                beforeAlt="Open-plan living room with white walls before repainting"
-                afterAlt="The same home with a slate-blue accent wall after repainting"
-                aspectClassName="aspect-[3/4]"
-              />
+            <div className="mx-auto w-full max-w-[540px]">
+              <div className="relative overflow-hidden rounded-3xl bg-slate-200 shadow-2xl ring-1 ring-black/5">
+                <img
+                  src={HERO_BEFORE}
+                  alt="Professional interior ready for color staging"
+                  className="aspect-[4/3] w-full object-cover"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-brand-dark/70 to-transparent p-6">
+                  <p className="text-sm font-semibold text-white">
+                    Real contractor job, ready to stage in any color
+                  </p>
+                </div>
+              </div>
               <p className="mt-4 text-center text-sm text-slate-400">
-                Real job, staged in PaintStage Pro. Drag the handle.
+                Stage any room in real fan-deck colors, in about a minute.
               </p>
             </div>
           </div>
@@ -205,10 +209,10 @@ const HomePage: React.FC<HomePageProps> = ({ onStart, onPricing }) => {
           <div className="mx-auto mb-16 max-w-2xl text-center">
             <p className="mb-3 text-sm font-bold uppercase tracking-widest text-brand-accent">Why painters use it</p>
             <h2 className="mb-4 text-3xl font-black text-brand-dark sm:text-4xl">
-              The estimate isn't the hard part. The colour is.
+              The estimate isn't the hard part. The color is.
             </h2>
             <p className="text-lg text-slate-500">
-              Jobs stall because a homeowner can't commit to a colour from a two-inch chip. Take that
+              Jobs stall because a homeowner can't commit to a color from a two-inch chip. Take that
               problem off the table and the quote gets signed.
             </p>
           </div>
@@ -282,7 +286,7 @@ const HomePage: React.FC<HomePageProps> = ({ onStart, onPricing }) => {
           <div className="order-2 lg:order-1">
             <p className="mb-3 text-sm font-bold uppercase tracking-widest text-brand-accent">Interiors</p>
             <h2 className="mb-4 text-3xl font-black leading-tight text-brand-dark sm:text-4xl">
-              Every colour on their walls, before you buy a single gallon
+              Every color on their walls, before you buy a single gallon
             </h2>
             <p className="mb-6 text-lg leading-relaxed text-slate-500">
               Naval or Agreeable Gray? Accent wall or the whole room? Settle it in the walkthrough with
@@ -293,7 +297,7 @@ const HomePage: React.FC<HomePageProps> = ({ onStart, onPricing }) => {
               {[
                 'Walls, trim and doors painted as separate passes',
                 'Before/after slider to send with the estimate',
-                'Search real colours by name, code or hex',
+                'Search real colors by name, code or hex',
                 'Refine lighter or darker without spending another stage',
               ].map(item => (
                 <li key={item} className="flex items-start gap-3 text-slate-600">
@@ -349,7 +353,7 @@ const HomePage: React.FC<HomePageProps> = ({ onStart, onPricing }) => {
             </h2>
             <p className="mb-6 text-lg leading-relaxed text-slate-500">
               Exterior repaints are where hesitation costs you the most. Show the whole elevation in the
-              colour they're considering, and in the two they haven't, before the ladders come off the
+              color they're considering, and in the two they haven't, before the ladders come off the
               truck.
             </p>
             <ul className="mb-8 space-y-3">
