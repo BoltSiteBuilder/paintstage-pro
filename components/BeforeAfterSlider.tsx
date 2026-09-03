@@ -7,7 +7,7 @@ interface BeforeAfterSliderProps {
   afterAlt: string;
   beforeLabel?: string;
   afterLabel?: string;
-  /** Tailwind aspect ratio class for the frame, e.g. "aspect-[4/5]". */
+  /** Tailwind aspect ratio class for the frame. Landscape by default so the whole room stays in frame. */
   aspectClassName?: string;
   className?: string;
 }
@@ -26,7 +26,7 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
   afterAlt,
   beforeLabel = 'Before',
   afterLabel = 'After',
-  aspectClassName = 'aspect-[3/4]',
+  aspectClassName = 'aspect-[3/2]',
   className = '',
 }) => {
   const frameRef = useRef<HTMLDivElement>(null);
